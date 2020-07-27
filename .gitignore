@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Custom Additions
+*.json
+!migrations/*
+migrations/current-*.json
+node_modules/*
+*.log
+venv/*
+config.py
