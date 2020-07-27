@@ -4,6 +4,7 @@
 #                                 Imports
 # --------------------------------------------------------------------------
 # Standard library imports
+import datetime
 import json
 import logging
 import os
@@ -62,11 +63,43 @@ def load_cogs(client):
                 client.load_extension(f"cogs.{cog}")
         except Exception as e:
             print(e)
+            traceback.print_exc()
+
+
+# --------------------------------------------------------------------------
+#                                 _prefix_callable
+# --------------------------------------------------------------------------
+def _prefix_callable(bot, msg):
+    user_id = bot.user.id
+    base = [f'<@!{user_id}> ', f'<@{user_id}> ']
+    if msg.guild is None:
+        base.append('?')
+        base.append('~')
+    else:
+        base.extend(bot.prefixes.get(msg.guild.id, ['?', '~']))
+    return base
 
 
 # --------------------------------------------------------------------------
 #                                  Bot Class
 # --------------------------------------------------------------------------
- class Zen(commands.Bot):
-     def __init__(self, command_prefix):
-         super().__init__(command_prefix)
+class Zen(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix=_prefix_callable, description=description, pm_help=None,
+                         help_attrs=dict(hidden=True), fetch_offline_members=False,
+                         heartbeat_timeout=150.0)
+
+    async def on_ready(self):
+        load_cogs(self)
+
+        if not hasattr(self, 'uptime'):
+            self.uptime = datetime.datetime.utcnow()
+        print(f'Ready: {self.user} (ID: {self.user.id})')
+
+        setup_logging()
+        print('Logging setup Complete')
+
+
+if __name__ == "__main__":
+    bot = Zen()
+    bot.run('Mjc2Njg0MjcyMDA0NDk3NDEw.WJMgTg.jx9Ft90MyVuHHtRSkNG6KftenR8')
