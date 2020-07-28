@@ -12,8 +12,8 @@ import sys
 import traceback
 
 # Third party imports
-from discord.ext import commands
 import discord # noqa
+from discord.ext import commands
 
 # Local application imports
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
