@@ -15,6 +15,7 @@ from discord.ext import commands
 # Enabling local imports
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
+from settings import embeds as emb # noqa
 
 
 # --------------------------------------------------------------------------
@@ -26,7 +27,9 @@ class General(commands.Cog):
 
     @commands.command(name="ping", pass_context=True)
     async def ping(self, ctx):
-        await ctx.send('Pong! Convert me to an embed plox')
+        description = f'Pong! {round(self.bot.latency *1000)} ms'
+        response = emb.gen_embed_green('Ping!', description)
+        await ctx.send(embed=response)
 
 
 def setup(bot):
