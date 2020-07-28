@@ -27,6 +27,10 @@ description = """
 Hello! I am a bot for DnD severs.
 """
 
+# Load config settings form json
+with open("settings/config.json") as conf:
+    configs = json.load(conf)
+
 
 # --------------------------------------------------------------------------
 #                                  Logging Setup
@@ -61,6 +65,7 @@ def load_cogs(client):
         try:
             if cog != "__init__":
                 client.load_extension(f"cogs.{cog}")
+                print(f"{cog} Loaded...")
         except Exception as e:
             print(e)
             traceback.print_exc()
@@ -86,9 +91,12 @@ def _prefix_callable(bot, msg):
 class Zen(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix=_prefix_callable, description=description, pm_help=None,
-                         help_attrs=dict(hidden=True), fetch_offline_members=False,
+                         help_attrs=dict(hidden=True), fetch_offline_members=True,
                          heartbeat_timeout=150.0)
 
+        self.client_id = configs['client_id']
+
+    # On ready Function
     async def on_ready(self):
         load_cogs(self)
 
@@ -102,4 +110,4 @@ class Zen(commands.Bot):
 
 if __name__ == "__main__":
     bot = Zen()
-    bot.run('Mjc2Njg0MjcyMDA0NDk3NDEw.WJMgTg.jx9Ft90MyVuHHtRSkNG6KftenR8')
+    bot.run(configs["token"])
