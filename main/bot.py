@@ -19,6 +19,7 @@ from discord.ext import commands
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
 from cogs.utils import context # noqa
+# from cogs.utils import embed_help as EmbedHelpCommand # noqa
 
 # --------------------------------------------------------------------------
 #                                  Bot.py
@@ -86,13 +87,76 @@ def _prefix_callable(bot, msg):
 
 
 # --------------------------------------------------------------------------
+#                               Help Command
+# --------------------------------------------------------------------------
+class EmbedHelpCommand(commands.HelpCommand):
+    """Overriding the basic help command with an embed."""
+    COLOR = discord.Color.blurple()
+
+    def get_ending_note(self):
+        return 'Use {0}{1} [command] for more info on a command.'.format(self.clean_prefix,
+                                                                         self.invoked_with)
+
+    def get_command_signature(self, command):
+        return '{0.qualified_name} {0.signature}'.format(command)
+
+    async def send_bot_help(self, mapping):
+        embed = discord.Embed(title='Bot Commands', colour=self.COLOR)
+        description = self.context.bot.description
+        if description:
+            embed.description = description
+
+        for cog, commands in mapping.items():
+            name = 'No Category' if cog is None else cog.qualified_name
+            filtered = await self.filter_commands(commands, sort=True)
+            if filtered:
+                value = '\u2002'.join(c.name for c in commands)
+                if cog and cog.description:
+                    value = '{0}\n{1}'.format(cog.description, value)
+
+                embed.add_field(name=name, value=value)
+
+        embed.set_footer(text=self.get_ending_note())
+        await self.get_destination().send(embed=embed)
+
+    async def send_cog_help(self, cog):
+        embed = discord.Embed(title='{0.qualified_name} Commands'.format(cog), colour=self.COLOR)
+        if cog.description:
+            embed.description = cog.description
+
+        filtered = await self.filter_commands(cog.get_commands(), sort=True)
+        for command in filtered:
+            embed.add_field(name=self.get_command_signature(command),
+                            value=command.short_doc or '...', inline=False)
+
+        embed.set_footer(text=self.get_ending_note())
+        await self.get_destination().send(embed=embed)
+
+    async def send_group_help(self, group):
+        embed = discord.Embed(title=group.qualified_name, colour=self.COLOR)
+        if group.help:
+            embed.description = group.help
+
+        if isinstance(group, commands.Group):
+            filtered = await self.filter_commands(group.commands, sort=True)
+            for command in filtered:
+                embed.add_field(name=self.get_command_signature(command),
+                                value=command.short_doc or '...', inline=False)
+
+        embed.set_footer(text=self.get_ending_note())
+        await self.get_destination().send(embed=embed)
+
+    send_command_help = send_group_help
+
+
+# --------------------------------------------------------------------------
 #                                  Bot Class
 # --------------------------------------------------------------------------
 class Zen(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix='~', description=description, pm_help=None,
                          help_attrs=dict(hidden=True), fetch_offline_members=True,
-                         heartbeat_timeout=150.0)
+                         heartbeat_timeout=150.0, help_command=EmbedHelpCommand())
 
         self.client_id = configs['client_id']
 
@@ -122,9 +186,9 @@ class Zen(commands.Bot):
         elif isinstance(error, commands.ArgumentParsingError):
             await ctx.send(error)
 
-    async def close(self):
-        await super().close()
-        await self.session.close()
+    # async def close(self):
+    #     await super().close()
+    #     await self.session.close()
 
 
 if __name__ == "__main__":
