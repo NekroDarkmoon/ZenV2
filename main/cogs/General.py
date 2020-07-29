@@ -31,6 +31,20 @@ class General(commands.Cog):
         response = emb.gen_embed_green('Ping!', description)
         await ctx.send(embed=response)
 
+    @commands.command(name='source')
+    async def source(self, ctx, *args):
+        trello = ''
+        github = 'https://github.com/NekroDarkmoon/Zen-Public/'
+
+        for arg in args:
+            if arg == '-t':
+                trello = 'https://trello.com/b/rej22uVl/zen'
+
+        try:
+            await ctx.send(github + '\n' + trello)
+        except Exception as e:
+            print(e)
+
 
 def setup(bot):
     bot.add_cog(General(bot))
