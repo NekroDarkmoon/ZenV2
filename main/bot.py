@@ -56,6 +56,7 @@ def setup_logging():
         handlers = log.handlers[:]
         for hdlr in handlers:
             hdlr.close()
+            log.removeHandler(hdlr)
 
 
 # --------------------------------------------------------------------------
