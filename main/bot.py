@@ -36,6 +36,7 @@ with open("settings/config.json") as conf:
 # --------------------------------------------------------------------------
 #                                  Logging Setup
 # --------------------------------------------------------------------------
+# Setting up the logging file
 def setup_logging():
     try:
         # __enter__
@@ -56,6 +57,7 @@ def setup_logging():
         handlers = log.handlers[:]
         for hdlr in handlers:
             hdlr.close()
+            log.removeHandler(hdlr)
 
 
 # --------------------------------------------------------------------------
