@@ -4,6 +4,7 @@
 #                                 Imports
 # --------------------------------------------------------------------------
 # Standard library imports
+import contextlib
 import datetime
 import json
 import logging
@@ -16,9 +17,7 @@ import discord # noqa
 from discord.ext import commands
 
 # Local application imports
-BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_PATH)
-from cogs.utils import context # noqa
+from main.cogs.utils import context # noqa
 # from cogs.utils import embed_help as EmbedHelpCommand # noqa
 
 # --------------------------------------------------------------------------
@@ -28,45 +27,21 @@ description = """
 Hello! I am a bot for DnD severs.
 """
 
-# Load config settings form json
-with open("settings/config.json") as conf:
+log = logging.getLogger(__name__)
+
+
+with open("main/settings/config.json") as conf:
     configs = json.load(conf)
-
-
-# --------------------------------------------------------------------------
-#                                  Logging Setup
-# --------------------------------------------------------------------------
-def setup_logging():
-    try:
-        # __enter__
-        logging.getLogger('discord').setLevel(logging.INFO)
-        logging.getLogger('discord.http').setLevel(logging.WARNING)
-
-        log = logging.getLogger()
-        log.setLevel(logging.INFO)
-        handler = logging.FileHandler(filename='bot.log', encoding='utf-8', mode='w')
-        dt_fmt = '%Y-%m-%d %H:%M:%S'
-        fmt = logging.Formatter('[{asctime}] [{levelname:<7}] {name}: {message}', dt_fmt, style='{')
-        handler.setFormatter(fmt)
-        log.addHandler(handler)
-
-        yield
-    finally:
-        # __exit__
-        handlers = log.handlers[:]
-        for hdlr in handlers:
-            hdlr.close()
-            log.removeHandler(hdlr)
 
 
 # --------------------------------------------------------------------------
 #                                  Load Cogs
 # --------------------------------------------------------------------------
-def load_cogs(client):
-    for cog in [file.split('.')[0] for file in os.listdir("cogs") if file.endswith(".py")]:
+def load_cogs(bot):
+    for cog in [file.split('.')[0] for file in os.listdir("main/cogs") if file.endswith(".py")]:
         try:
             if cog != "__init__":
-                client.load_extension(f"cogs.{cog}")
+                bot.load_extension(f"main.cogs.{cog}")
                 print(f"{cog} Loaded...")
         except Exception as e:
             print(e)
@@ -167,10 +142,8 @@ class Zen(commands.Bot):
 
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
-        print(f'Ready: {self.user} (ID: {self.user.id})')
 
-        setup_logging()
-        print('Logging setup Complete')
+        print(f'Ready: {self.user} (ID: {self.user.id})')
 
     # Command Error handler
     async def on_command_error(self, ctx, error):
@@ -191,7 +164,12 @@ class Zen(commands.Bot):
     #     await super().close()
     #     await self.session.close()
 
+    def run(self):
+        try:
+            super().run(configs["token"], reconnect=True)
+        except Exception as e:
+            print(e)
 
-if __name__ == "__main__":
-    bot = Zen()
-    bot.run(configs["token"])
+# if __name__ == "__main__":
+#     bot = Zen()
+#     bot.run(configs["token"])
