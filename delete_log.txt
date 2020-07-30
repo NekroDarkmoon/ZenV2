@@ -1,0 +1,9 @@
+general-prog:	Kishi#6581 - Well, then
+Kishi#6581	hah
+general:	Kishi#6581 - Hah
+general:	Kishi#6581 - 밥을 먹었어요?
+general:	Kishi#6581 - *Oi*
+general:	Kishi#6581 - ```
+beep
+boop
+```
