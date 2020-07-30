@@ -4,6 +4,7 @@
 #                                 Imports
 # --------------------------------------------------------------------------
 # Standard library imports
+import contextlib
 import datetime
 import json
 import logging
@@ -28,6 +29,8 @@ description = """
 Hello! I am a bot for DnD severs.
 """
 
+log = logging.getLogger(__name__)
+
 # Load config settings form json
 with open("settings/config.json") as conf:
     configs = json.load(conf)
@@ -37,6 +40,7 @@ with open("settings/config.json") as conf:
 #                                  Logging Setup
 # --------------------------------------------------------------------------
 # Setting up the logging file
+@contextlib.contextmanager
 def setup_logging():
     try:
         # __enter__
@@ -168,10 +172,8 @@ class Zen(commands.Bot):
 
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
-        print(f'Ready: {self.user} (ID: {self.user.id})')
 
-        setup_logging()
-        print('Logging setup Complete')
+        print(f'Ready: {self.user} (ID: {self.user.id})')
 
     # Command Error handler
     async def on_command_error(self, ctx, error):
@@ -194,5 +196,7 @@ class Zen(commands.Bot):
 
 
 if __name__ == "__main__":
-    bot = Zen()
-    bot.run(configs["token"])
+    with setup_logging():
+        log = logging.getLogger()
+        bot = Zen()
+        bot.run(configs["token"])
