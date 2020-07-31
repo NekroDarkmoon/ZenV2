@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------
 # Standard library imports
 import asyncio
+import asyncpg
 import click
 import importlib
 import contextlib
@@ -58,9 +59,16 @@ def run_bot():
     log = logging.getLogger()
 
     # Setup db here
+    try:
+        pool = loop.run_until_complete(create_db_pool())
+    except Exception as e:
+        click.echo('Could not set up PostgreSQL. Exiting.', file=sys.stderr)
+        log.exception('Could not set up PostgreSQL. Exiting.')
+        print(e)
+        return
 
     bot = Zen()
-    # bot.pool = pool
+    bot.pool = pool
     bot.run()
 
 
@@ -75,6 +83,24 @@ def main(ctx):
         loop = asyncio.get_event_loop()
         with setup_logging():
             run_bot()
+
+
+# --------------------------------------------------------------------------
+#                                   DB Setup
+# --------------------------------------------------------------------------
+async def create_db_pool():
+    conn = await asyncpg.create_pool(database='Zen', user='Zen', password='nothing_is_free')
+
+    # Add tables here
+    # Table for leveling system
+    sql = """CREATE TABLE IF NOT EXISTS lb(server_id integer NOT NULL,
+                                           user_id INTEGER NOT NULL,
+                                           msg_amt INTEGER NOT NULL,
+                                           total_exp INTEGER not NULL,
+                                           level INTEGER NOT NULL);"""
+    await conn.execute(sql)
+
+    return conn
 
 
 if __name__ == '__main__':
