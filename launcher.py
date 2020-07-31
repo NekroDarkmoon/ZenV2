@@ -58,9 +58,13 @@ def run_bot():
     loop = asyncio.get_event_loop()
     log = logging.getLogger()
 
+    # Getting config files
+    with open("main/settings/config.json") as conf:
+        configs = json.load(conf)
+
     # Setup db here
     try:
-        pool = loop.run_until_complete(create_db_pool())
+        pool = loop.run_until_complete(create_db_pool(configs))
     except Exception as e:
         click.echo('Could not set up PostgreSQL. Exiting.', file=sys.stderr)
         log.exception('Could not set up PostgreSQL. Exiting.')
@@ -69,6 +73,7 @@ def run_bot():
 
     bot = Zen()
     bot.pool = pool
+    bot.configs = configs
     bot.run()
 
 
@@ -88,8 +93,8 @@ def main(ctx):
 # --------------------------------------------------------------------------
 #                                   DB Setup
 # --------------------------------------------------------------------------
-async def create_db_pool():
-    conn = await asyncpg.create_pool(database='Zen', user='Zen', password='nothing_is_free')
+async def create_db_pool(configs):
+    conn = await asyncpg.create_pool(database='Zen', user='Zen', password=configs['db_password'])
 
     # Add tables here
     # Table for leveling system

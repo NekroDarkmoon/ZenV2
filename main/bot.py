@@ -30,10 +30,6 @@ Hello! I am a bot for DnD severs.
 log = logging.getLogger(__name__)
 
 
-with open("main/settings/config.json") as conf:
-    configs = json.load(conf)
-
-
 # --------------------------------------------------------------------------
 #                                  Load Cogs
 # --------------------------------------------------------------------------
@@ -134,7 +130,7 @@ class Zen(commands.Bot):
                          help_attrs=dict(hidden=True), fetch_offline_members=True,
                          heartbeat_timeout=150.0, help_command=EmbedHelpCommand())
 
-        self.client_id = configs['client_id']
+        # self.client_id = self.configs['client_id']
 
     # On ready Function
     async def on_ready(self):
@@ -142,7 +138,6 @@ class Zen(commands.Bot):
 
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
-
         print(f'Ready: {self.user} (ID: {self.user.id})')
 
     # Command Error handler
@@ -166,7 +161,7 @@ class Zen(commands.Bot):
 
     def run(self):
         try:
-            super().run(configs["token"], reconnect=True)
+            super().run(self.configs["token"], reconnect=True)
         except Exception as e:
             print(e)
 
