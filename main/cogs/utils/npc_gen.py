@@ -58,7 +58,6 @@ def get_sex(sex):
         elif sex.lower() == 't':
             return "Neutral"
         else:
-            print(sex)
             return None
 
 
