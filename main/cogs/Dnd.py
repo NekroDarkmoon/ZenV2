@@ -27,7 +27,7 @@ class Dnd(commands.Cog):
         self.bot = bot
 
     @commands.command(name="gnpc", pass_context=True, help="Generating a random npc.",
-                      usage="m/f race")
+                      usage="m/f/t[Optional], race[Optional]")
     async def gnpc(self, ctx, *args):
         sex = None
         race = None
