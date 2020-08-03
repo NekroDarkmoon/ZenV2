@@ -2,6 +2,12 @@
 #                              Imports
 # -------------------------------------------------------------------------
 import random
+import sys
+import os
+
+
+BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_PATH)
 
 
 # -------------------------------------------------------------------------
@@ -9,7 +15,7 @@ import random
 # -------------------------------------------------------------------------
 def get_name(sex):
     # Variables
-    f_names = 'data/name_dict2.txt'
+    f_names = './main/data/name_dict2.txt'
     fsex = ""
 
     # Fix sex for data extraction
@@ -19,11 +25,15 @@ def get_name(sex):
     # Generate a seed
     while(sex[0] != fsex):
         gen_num = random.randint(1, 48530)
-        with open(f_names, 'r') as f:
-            # line = linecache.getline(f_names, gen_num)
-            line = f.readlines()[gen_num]
+        try:
+            with open(f_names, 'r') as f:
+                # line = linecache.getline(f_names, gen_num)
+                line = f.readlines()[gen_num]
 
-            fsex = (line[0:1])
+                fsex = (line[0:1])
+        except Exception as e:
+            print(e)
+            return
 
     ret_val = (line[3:-1])
     return ret_val
@@ -33,8 +43,8 @@ def get_name(sex):
 #                                  Sex Gen
 # -------------------------------------------------------------------------
 def get_sex(sex):
-    if len(sex) == 0:
-        seed = random.randint(1, 1000)
+    if sex is None:
+        seed = random.randint(1, 100)
         if seed % 2 == 0:
             return 'Male'
         else:
@@ -83,7 +93,7 @@ def get_awh(race, norm_races):
 # -------------------------------------------------------------------------
 #                                  Main
 # -------------------------------------------------------------------------
-def main(gender="", chosen_race=""):
+def main(gender=None, chosen_race=None):
     # Variables
     npc = {
         'First Name': '',
@@ -122,7 +132,7 @@ def main(gender="", chosen_race=""):
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Generating Race
     choice_exists = False
-    if len(chosen_race) == 0:
+    if chosen_race is None:
         npc['Race'] = random.choice(list(norm_races))
         choice_exists = True
 
@@ -132,10 +142,8 @@ def main(gender="", chosen_race=""):
             choice_exists = True
             break
 
-    print(choice_exists)
     if choice_exists is False:
-        return
-        (f"Chosen race doesn't exist.\n Choices: {list(norm_races.keys())}")
+        return(f"Chosen race doesn't exist.\n Choices: {list(norm_races.keys())}")
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Getting Age, weight and height

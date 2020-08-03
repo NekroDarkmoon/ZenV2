@@ -18,6 +18,7 @@ sys.path.append(BASE_PATH)
 from settings import embeds as emb # noqa
 from utils import npc_gen as npcgen # noqa
 
+
 # --------------------------------------------------------------------------
 #                                 Main
 # --------------------------------------------------------------------------
@@ -25,9 +26,19 @@ class Dnd(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="gnpc", pass_context=True)
+    @commands.command(name="gnpc", pass_context=True, help="Generating a random npc.",
+                      usage="m/f race")
     async def gnpc(self, ctx, *args):
-        response = emb.gen_embed_cobalt('NPC Generator', npcgen.main("", ""))
+        sex = None
+        race = None
+
+        for arg in args:
+            if len(arg) == 1:
+                sex = arg
+            else:
+                race = arg
+        response = npcgen.main(sex, race)
+        response = emb.gen_embed_cobalt('NPC Generator', response)
         await ctx.send(embed=response)
 
 
