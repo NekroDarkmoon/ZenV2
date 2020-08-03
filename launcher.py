@@ -20,6 +20,7 @@ import sys
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
 from main.bot import Zen # noqa
+from main.cogs.utils import db # noqa
 
 
 # --------------------------------------------------------------------------
@@ -64,7 +65,7 @@ def run_bot():
 
     # Setup db here
     try:
-        pool = loop.run_until_complete(create_db_pool(configs))
+        pool = loop.run_until_complete(db.create_db(configs))
     except Exception as e:
         click.echo('Could not set up PostgreSQL. Exiting.', file=sys.stderr)
         log.exception('Could not set up PostgreSQL. Exiting.')
@@ -88,24 +89,6 @@ def main(ctx):
         loop = asyncio.get_event_loop()
         with setup_logging():
             run_bot()
-
-
-# --------------------------------------------------------------------------
-#                                   DB Setup
-# --------------------------------------------------------------------------
-async def create_db_pool(configs):
-    conn = await asyncpg.create_pool(database='Zen', user='Zen', password=configs['db_password'])
-
-    # Add tables here
-    # Table for leveling system
-    sql = """CREATE TABLE IF NOT EXISTS lb(server_id integer NOT NULL,
-                                           user_id INTEGER NOT NULL,
-                                           msg_amt INTEGER NOT NULL,
-                                           total_exp INTEGER not NULL,
-                                           level INTEGER NOT NULL);"""
-    await conn.execute(sql)
-
-    return conn
 
 
 if __name__ == '__main__':
