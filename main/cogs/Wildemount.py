@@ -157,7 +157,8 @@ class Wildemount(commands.Cog):
         try:
             quest_id = int(quest_id)
         except ValueError:
-            await ctx.send(embed=emb.gen_embed_orange('LFG - Error', 'Error. Please enter a number.'))
+            await ctx.send(embed=emb.gen_embed_orange('LFG - Error',
+                                                      'Error. Please enter a number.'))
             return
 
         sql = """SELECT * FROM quest WHERE server_id=$1 AND quest_id=$2"""
@@ -169,7 +170,8 @@ class Wildemount(commands.Cog):
             return
 
         if author != record[2]:
-            await ctx.send(embed=emb.gen_embed_yellow("LFG - Error",  "You're not the author of the quest."))
+            await ctx.send(embed=emb.gen_embed_yellow("LFG - Error",
+                                                      "You're not the author of the quest."))
             return
 
         sql = """DELETE FROM quest WHERE server_id=$1 AND quest_id=$2"""
@@ -183,6 +185,99 @@ class Wildemount(commands.Cog):
             print(e)
             await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
             return
+
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                                   CPC
+    @commands.command(name="playchn", help="List all lfg quests")
+    async def playchn(self, ctx, *args):
+        await ctx.message.delete()
+        # Get vars
+        server = ctx.guild
+        author = ctx.author
+        delete_query = False
+        exit_query = False
+
+        # Initial Validation
+        if len(args) > 15:
+            response = emb.gen_embed_yellow('Error', 'Max of 9 Players allowed.')
+            await ctx.send(embed=response)
+            return
+
+        channel_name = f"{author.name}s game"
+        channel_name = channel_name.lower().replace(' ', '-')
+        cat_chns = getattr(server, 'categories', None)
+        for chn in cat_chns:
+            if chn.name == 'Play Channels':
+                category = chn
+
+        # Validation
+        channels = getattr(server, 'channels', None)
+
+        ids = []
+        for arg in args:
+            if len(args) == 1 and arg == '-d':
+                delete_query = True
+            elif len(args) != 1 and arg == '-d':
+                await ctx.send(embed=emb.gen_embed_yellow('Error', 'Invalid Arguments'))
+                return
+            elif arg.startswith('<@!'):
+                ids.append(arg.replace('<@!', '').replace('>', ''))
+
+        # The weird delete query and validation query
+        for channel in channels:
+            if channel.name == channel_name:
+                if delete_query:
+                    try:
+                        await channel.delete()
+                        await ctx.send(embed=emb.gen_embed_green(author.name,
+                                       f'{channel.name} Deleted'), delete_after=5)
+                        exit_query = True
+                    except Exception as e:
+                        print(e)
+                else:
+                    e = 'You already have an existing play channel. Unable to create more than one.'
+                    e += '\nPinging a Crownsguard for help'
+                    response = emb.gen_embed_yellow('Error', e)
+                    try:
+                        await ctx.send('<@!157433182331863040>', embed=response)
+                        exit_query = True
+                        break
+                    except Exception as e:
+                        print(e)
+
+        if exit_query or delete_query:
+            return
+
+        # Getting members
+        users = []
+        for id in ids:
+            users.append(await self.bot.fetch_user(id))
+
+        # Setting permissions
+        overwrites = {
+            server.default_role: discord.PermissionOverwrite(send_messages=False),
+            author: discord.PermissionOverwrite(send_messages=True)
+            }
+
+        audio_overwrites = {
+            server.default_role: discord.PermissionOverwrite(speak=True),
+            author: discord.PermissionOverwrite(speak=False)
+            }
+
+        for user in users:
+            overwrites.update({user: discord.PermissionOverwrite(send_messages=True)})
+            audio_overwrites.update(
+                {user: discord.PermissionOverwrite(speak=True)}
+                )
+
+        try:
+            channel = await server.create_text_channel(channel_name, overwrites=overwrites,
+                                                       category=category)
+            await server.create_voice_channel(channel_name, category=category)
+            response = emb.gen_embed_green('Game Channel', 'Created respective channels.')
+            await ctx.send(channel.mention, embed=response)
+        except Exception as e:
+            print(e)
 
 
 def setup(bot):
