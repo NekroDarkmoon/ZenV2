@@ -10,3 +10,8 @@
 07. Populate config.json
 08. `cd main`
 09. `bot.py`
+
+### Install db
+01. Download from https://www.postgresql.org/
+02. Create a new user called  `Zen` with `yourpw`
+03. Create a new database called `Zen` with owner `Zen`

@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------
 # Standard library imports
 import asyncio
+import asyncpg
 import click
 import importlib
 import contextlib
@@ -19,6 +20,7 @@ import sys
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
 from main.bot import Zen # noqa
+from main.cogs.utils import db # noqa
 
 
 # --------------------------------------------------------------------------
@@ -57,10 +59,22 @@ def run_bot():
     loop = asyncio.get_event_loop()
     log = logging.getLogger()
 
+    # Getting config files
+    with open("main/settings/config.json") as conf:
+        configs = json.load(conf)
+
     # Setup db here
+    try:
+        pool = loop.run_until_complete(db.create_db(configs))
+    except Exception as e:
+        click.echo('Could not set up PostgreSQL. Exiting.', file=sys.stderr)
+        log.exception('Could not set up PostgreSQL. Exiting.')
+        print(e)
+        return
 
     bot = Zen()
-    # bot.pool = pool
+    bot.pool = pool
+    bot.configs = configs
     bot.run()
 
 

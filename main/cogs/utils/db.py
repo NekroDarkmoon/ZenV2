@@ -24,10 +24,11 @@ sys.path.append(BASE_PATH)
 async def create_schemas(conn):
     # Add tables here
     # Table for server settings
-    sql = """CREATE TABLE IF NOT EXISTS settings(server_id INTEGER NOT NULL,
+
+    sql = """CREATE TABLE IF NOT EXISTS settings(server_id BIGINT NOT NULL,
                                                  prefix TEXT,
-                                                 log_channel INTEGER,
-                                                 welcome_channel INTEGER,
+                                                 log_channel BIGINT,
+                                                 welcome_channel BIGINT,
                                                  dnd_cog BOOLEAN NOT NULL DEFAULT FALSE,
                                                  leveling_cog BOOLEAN NOT NULL DEFAULT FALSE,
                                                  tag_cog BOOLEAN NOT NULL DEFAULT FALSE,
@@ -35,21 +36,23 @@ async def create_schemas(conn):
                                                  voice_cog BOOLEAN NOT NULL DEFAULT FALSE);"""
 
     await conn.execute(sql)
+
     # Table for leveling system
-    sql = """CREATE TABLE IF NOT EXISTS lb(server_id integer NOT NULL,
-                                           user_id INTEGER NOT NULL,
-                                           msg_amt INTEGER NOT NULL,
-                                           total_exp INTEGER not NULL,
-                                           level INTEGER NOT NULL);"""
+    sql = """CREATE TABLE IF NOT EXISTS lb(server_id BIGINT NOT NULL,
+                                           user_id BIGINT NOT NULL,
+                                           msg_amt BIGINT NOT NULL,
+                                           total_exp BIGINT not NULL,
+                                           level BIGINT NOT NULL);"""
 
     await conn.execute(sql)
+
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Custom tables for certain servers
-    sql = '''CREATE TABLE quest(server_id INTEGER NOT NULL,
-                                quest_id INTEGER UNIQUE,
-                                author TEXT NOT NULL,
-                                quest_type text NOT NULL,
-                                msg TEXT);'''
+    sql = '''CREATE TABLE IF NOT EXISTS quest(server_id INTEGER NOT NULL,
+                                              quest_id INTEGER UNIQUE,
+                                              author TEXT NOT NULL,
+                                              quest_type text NOT NULL,
+                                              msg TEXT);'''
 
     await conn.execute(sql)
     return
@@ -59,7 +62,7 @@ async def create_schemas(conn):
 #                                   Main
 # --------------------------------------------------------------------------
 async def create_db(configs):
-    conn = await asyncpg.create_pool(database='zen', user='zen', password=configs['db_password'])
+    conn = await asyncpg.create_pool(database='Zen', user='Zen', password=configs['db_password'])
     try:
         await create_schemas(conn)
     except Exception as e:

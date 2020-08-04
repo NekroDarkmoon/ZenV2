@@ -4,6 +4,7 @@
 #                                 Imports
 # --------------------------------------------------------------------------
 # Standard library imports
+import logging
 import sys
 import os
 
@@ -18,6 +19,9 @@ sys.path.append(BASE_PATH)
 from settings import embeds as emb # noqa
 
 
+log = logging.getLogger(__name__)
+
+
 # --------------------------------------------------------------------------
 #                                 Main
 # --------------------------------------------------------------------------
@@ -26,7 +30,7 @@ class Admin(commands.Cog):
         self.bot = bot
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    @commands.command(name="kick", pass_context=True)
+    @commands.command(name="kick", pass_context=True, help="Kicks a user from the server")
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason=None):
@@ -48,7 +52,7 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    @commands.command(name="ban", pass_context=True)
+    @commands.command(name="ban", pass_context=True, help="Bans the user from the server")
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
@@ -68,7 +72,7 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    @commands.command(name="unban", pass_context=True)
+    @commands.command(name="unban", pass_context=True, help="Unbans the user from the server")
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.Member, *, reason=None):
@@ -90,6 +94,7 @@ class Admin(commands.Cog):
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     @commands.command(name="userinfo", pass_context=True)
     @commands.guild_only()
+    @commands.has_permissions(ban_members=True)
     async def userinfo(self, ctx, member: discord.Member):
         """Displays information about a user"""
         try:
