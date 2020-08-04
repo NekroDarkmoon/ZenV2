@@ -104,9 +104,15 @@ class Logging(commands.Cog):
                 return
 
             member = before.name
+            id = before.id
             oldNick = before.nick
             newNick = after.nick
             guild = before.guild
+
+            if oldNick is None:
+                oldNick = before.name
+            if newNick is None:
+                newNick = before.name
 
             if oldNick == newNick:
                 return
@@ -119,11 +125,11 @@ class Logging(commands.Cog):
             if send_channel is None:
                 send_channel = await guild.create_text_channel('all-logs', category=cat)
             # Creating Embed
-            response = emb.gen_embed_orange("Nickname Change Log",
-                                            f"""Member: {member}
+            response = emb.gen_embed_orange(member,
+                                            f"""User Id: {id}
                                             Old Nickname: {oldNick}
                                             New Nickname: {newNick}""")
-
+            response.set_thumbnail(url=before.avatar_url)
             await send_channel.send(embed=response)
         except Exception as e:
             print(e)
