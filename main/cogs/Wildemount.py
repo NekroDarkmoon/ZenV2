@@ -76,17 +76,68 @@ class Wildemount(commands.Cog):
     #                          Creating an lfg
     @commands.command(name="lfg", help="List all lfg quests", usage="d/p Description")
     async def lfg(self, ctx, quest_id=None):
+        await ctx.message.delete()
 
         sql = """SELECT * FROM quest WHERE server_id=$1"""
         try:
             rows = await self.bot.pool.fetch(sql, ctx.guild.id)
         except Exception as e:
-            print(e)
+            print("Failed to read data from sqlite table", e)
+            await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
+            return
 
-        for record in rows:
-            entry = f"{record[2]}: **{record[3]}** - {record[4]}"
+        # Validation
+        if len(rows) == 0:
+            response = emb.gen_embed_yellow("Looking for a Game", "No quests exist on this server")
+            await ctx.send(embed=response)
+            return
+
+        if quest_id is not None:
+            try:
+                quest_id = int(quest_id)
+            except ValueError:
+                response = emb.gen_embed_yellow('LFG', 'Error. Please enter a number.')
+                await ctx.send(embed=response)
+                return
+
+            sql = """SELECT * FROM quest WHERE server_id=$1 AND quest_id=$2"""
+
+            try:
+                record = await self.bot.pool.fetchrow(sql, ctx.guild.id, quest_id)
+            except Exception as e:
+                print("Failed to read data from sqlite table", e)
+                await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
+                return
+                print(record)
+                if record is None:
+                    response = emb.gen_embed_yellow('LFG', 'Error. No such quest exists.')
+                    await ctx.send(embed=response)
+                    return
+
+            entry = (f"{record[2]}: **{record[3]}** - {record[4]}")
             response = emb.gen_embed_green(f"Quest ID: {record[1]}", f"{entry}")
             await ctx.send(embed=response)
+            return
+
+        if len(rows) > 10:
+            e = emb.gen_embed_green('Quests Available',
+                                    "You can select view the following quests via `lfg quest_id`")
+            for record in rows:
+                desc = record[4].replace("`", "").replace('\n', "")
+                desc = f"**{record[3]}** - {desc[:40]}..."
+                e.add_field(name=f'Quest ID: {record[1]}', value=desc, inline=False)
+
+                if (len(e.fields)) > 20:
+                    await ctx.send(embed=e)
+                    e.clear_fields()
+
+            await ctx.send(embed=e)
+
+        else:
+            for record in rows:
+                entry = f"{record[2]}: **{record[3]}** - {record[4]}"
+                response = emb.gen_embed_green(f"Quest ID: {record[1]}", f"{entry}")
+                await ctx.send(embed=response)
 
 
 def setup(bot):
