@@ -25,8 +25,11 @@ class Wildemount(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="load", pass_context="True")
-    @commands.has_permissions(administrator=True)
+    # Cog check
+    async def cog_check(self, ctx):
+        return ctx.guild.id == 739684323141353597
+
+    @commands.command(name="beep", pass_context="True")
     async def beep(self, ctx):
         await ctx.message.delete()
         response = emb.gen_embed_green('Beep', 'Boop')
