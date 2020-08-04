@@ -48,7 +48,7 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    @commands.command(name="ban", pass_context=True, help="Bans the user from the server.")
+    @commands.command(name="ban", pass_context=True, help="Bans the user from the server")
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
@@ -90,7 +90,7 @@ class Admin(commands.Cog):
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     @commands.command(name="userinfo", pass_context=True)
     @commands.guild_only()
-    @commands.has_permission(kick_members=True)
+    @commands.has_permissions(ban_members=True)
     async def userinfo(self, ctx, member: discord.Member):
         """Displays information about a user"""
         try:
