@@ -25,13 +25,13 @@ class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="ping", pass_context=True)
+    @commands.command(name="ping", pass_context=True, help="Replies with the latency to the bot.")
     async def ping(self, ctx):
         description = f'Pong! {round(self.bot.latency *1000)} ms'
         response = emb.gen_embed_green('Ping!', description)
         await ctx.send(embed=response)
 
-    @commands.command(name='source')
+    @commands.command(name='source', help="Gets the bot's source code and trello page.")
     async def source(self, ctx, *args):
         trello = ''
         github = 'https://github.com/NekroDarkmoon/Zen-Public/'
