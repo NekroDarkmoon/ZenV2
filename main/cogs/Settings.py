@@ -29,7 +29,7 @@ class Settings(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def load(self, ctx, extension):
         try:
-            self.bot.load_extension(f"cogs.{extension}")
+            self.bot.load_extension(f"main.cogs.{extension}")
             print(f"{extension} loaded")
             response = emb.gen_embed_orange("System Alert", f"{extension} loaded")
             await ctx.send(embed=response)
@@ -42,7 +42,7 @@ class Settings(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def unload(self, ctx, extension):
         try:
-            self.bot.unload_extension(f"cogs.{extension}")
+            self.bot.unload_extension(f"main.cogs.{extension}")
             print(f"{extension} unloaded")
             response = emb.gen_embed_orange("System Alert", f"{extension} unloaded")
             await ctx.send(embed=response)
@@ -55,8 +55,8 @@ class Settings(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def reload(self, ctx, extension):
         try:
-            self.bot.unload_extension(f"cogs.{extension}")
-            self.bot.load_extension(f"cogs.{extension}")
+            self.bot.unload_extension(f"main.cogs.{extension}")
+            self.bot.load_extension(f"main.cogs.{extension}")
             print(f"{extension} reloaded")
             response = emb.gen_embed_orange("System Alert", f"{extension} reloaded")
             await ctx.send(embed=response)

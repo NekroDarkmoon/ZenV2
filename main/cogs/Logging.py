@@ -47,9 +47,9 @@ class Logging(commands.Cog):
             if cat is None:
                 cat = await guild.create_category('logs')
 
-            send_channel = utils.get(guild.text_channels, name='msg-logs')
+            send_channel = utils.get(guild.text_channels, name='all-logs')
             if send_channel is None:
-                send_channel = await guild.create_text_channel('msg-logs', category=cat)
+                send_channel = await guild.create_text_channel('all-logs', category=cat)
             # Creating Embed
             response = emb.gen_embed_orange("Deleted Message Log",
                                             f"""Channel: {oc}
@@ -66,11 +66,13 @@ class Logging(commands.Cog):
         try:
             if before.author.bot:
                 return
+            if (after.edited_at - before.created_at).total_seconds() < 60:
+                return
 
             author = before.author
             oc = before.channel
-            bContent = before.content
-            aContent = after.content
+            oldContent = before.content
+            newContent = after.content
             guild = after.guild
             attachment = after.attachments
             if attachment != []:
@@ -80,16 +82,47 @@ class Logging(commands.Cog):
             if cat is None:
                 cat = await guild.create_category('logs')
 
-            send_channel = utils.get(guild.text_channels, name='msg-logs')
+            send_channel = utils.get(guild.text_channels, name='all-logs')
             if send_channel is None:
-                send_channel = await guild.create_text_channel('msg-logs', category=cat)
+                send_channel = await guild.create_text_channel('all-logs', category=cat)
             # Creating Embed
             response = emb.gen_embed_orange("Edited Message Log",
                                             f"""Channel: {oc}
                                             Author: {author}
-                                            Before: {bContent}
-                                            After: {aContent}
+                                            Before: {oldContent}
+                                            After: {newContent}
                                             Attachments: {attachment}""")
+
+            await send_channel.send(embed=response)
+        except Exception as e:
+            print(e)
+
+    @commands.Cog.listener(name="on_member_update")
+    async def on_member_update(self, before, after):
+        try:
+            if before.bot:
+                return
+
+            member = before.name
+            oldNick = before.nick
+            newNick = after.nick
+            guild = before.guild
+
+            if oldNick == newNick:
+                return
+
+            cat = utils.get(guild.categories, name='logs')
+            if cat is None:
+                cat = await guild.create_category('logs')
+
+            send_channel = utils.get(guild.text_channels, name='all-logs')
+            if send_channel is None:
+                send_channel = await guild.create_text_channel('all-logs', category=cat)
+            # Creating Embed
+            response = emb.gen_embed_orange("Nickname Change Log",
+                                            f"""Member: {member}
+                                            Old Nickname: {oldNick}
+                                            New Nickname: {newNick}""")
 
             await send_channel.send(embed=response)
         except Exception as e:
