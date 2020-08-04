@@ -24,6 +24,7 @@ sys.path.append(BASE_PATH)
 async def create_schemas(conn):
     # Add tables here
     # Table for server settings
+
     sql = """CREATE TABLE IF NOT EXISTS settings(server_id BIGINT NOT NULL,
                                                  prefix TEXT,
                                                  log_channel BIGINT,
@@ -35,6 +36,7 @@ async def create_schemas(conn):
                                                  voice_cog BOOLEAN NOT NULL DEFAULT FALSE);"""
 
     await conn.execute(sql)
+
     # Table for leveling system
     sql = """CREATE TABLE IF NOT EXISTS lb(server_id BIGINT NOT NULL,
                                            user_id BIGINT NOT NULL,
@@ -43,6 +45,7 @@ async def create_schemas(conn):
                                            level BIGINT NOT NULL);"""
 
     await conn.execute(sql)
+
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Custom tables for certain servers
     sql = '''CREATE TABLE IF NOT EXISTS quest(server_id INTEGER NOT NULL,
@@ -50,7 +53,6 @@ async def create_schemas(conn):
                                               author TEXT NOT NULL,
                                               quest_type text NOT NULL,
                                               msg TEXT);'''
-
 
     await conn.execute(sql)
     return
