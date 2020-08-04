@@ -29,8 +29,12 @@ class Settings(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # Cog check
+    async def cog_check(self, ctx):
+        owners = [563066232593448990, 431499845644320770, 157433182331863040]
+        return True if ctx.author.id in owners else False
+
     @commands.command(name="load", pass_context="True")
-    @commands.has_permissions(administrator=True)
     async def load(self, ctx, extension):
         try:
             self.bot.load_extension(f"main.cogs.{extension}")
@@ -43,7 +47,6 @@ class Settings(commands.Cog):
             await ctx.send(embed=response)
 
     @commands.command(name="unload", pass_context="True")
-    @commands.has_permissions(administrator=True)
     async def unload(self, ctx, extension):
         try:
             self.bot.unload_extension(f"main.cogs.{extension}")
@@ -56,7 +59,6 @@ class Settings(commands.Cog):
             await ctx.send(embed=response)
 
     @commands.command(name="reload", pass_context="True")
-#    @commands.has_permissions(administrator=True)
     async def reload(self, ctx, extension):
         try:
             self.bot.unload_extension(f"main.cogs.{extension}")
