@@ -59,7 +59,7 @@ async def create_schemas(conn):
 #                                   Main
 # --------------------------------------------------------------------------
 async def create_db(configs):
-    conn = await asyncpg.create_pool(database='Zen', user='Zen', password=configs['db_password'])
+    conn = await asyncpg.create_pool(database='zen', user='zen', password=configs['db_password'])
     try:
         await create_schemas(conn)
     except Exception as e:
