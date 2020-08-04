@@ -40,25 +40,23 @@ class Logging(commands.Cog):
             oc = message.channel
             content = message.content
             guild = message.guild
-            attachment = message.attachments[0]
+            attachment = message.attachments
+            if attachment != []:
+                attachment = message.attachments[0].proxy_url
 
-            m = (dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S") +
-                 "\t\t" + str(oc) + ":\t" + str(author) + " - " + content + "\n")
-            with open("delete_log.log", "a+", encoding="utf-8") as f:
-                f.write(m)
-            f.close()
+            cat = utils.get(guild.categories, name='logs')
+            if cat is None:
+                cat = await guild.create_category('logs')
 
-
-
-            send_channel = utils.get(guild.text_channels, name='delete-logs')
+            send_channel = utils.get(guild.text_channels, name='msg-logs')
             if send_channel is None:
-                send_channel = await guild.create_text_channel('delete-logs')
+                send_channel = await guild.create_text_channel('msg-logs', category=cat)
             # Creating Embed
             response = emb.gen_embed_orange("Deleted Message Log",
                                             f"""Channel: {oc}
                                             Author: {author}
                                             Content:{content}
-                                            Attachments:{attachment.proxy_url}""")
+                                            Attachments: {attachment}""")
 
             await send_channel.send(embed=response)
         except Exception as e:
@@ -69,11 +67,32 @@ class Logging(commands.Cog):
         try:
             if before.author.bot:
                 return
-            with open("edit_log.log", "a+", encoding="utf-8") as f:
-                f.write(dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S") +
-                        "\t\t" + str(before.channel) + ":\t" + str(before.author) + " - " + before.content +
-                        " | " + after.content + "\n")
-            f.close()
+
+            author = before.author
+            oc = before.channel
+            bContent = before.content
+            aContent = after.content
+            guild = after.guild
+            attachment = after.attachments
+            if attachment != []:
+                attachment = after.attachments[0].proxy_url
+
+            cat = utils.get(guild.categories, name='logs')
+            if cat is None:
+                cat = await guild.create_category('logs')
+
+            send_channel = utils.get(guild.text_channels, name='msg-logs')
+            if send_channel is None:
+                send_channel = await guild.create_text_channel('msg-logs', category=cat)
+            # Creating Embed
+            response = emb.gen_embed_orange("Edited Message Log",
+                                            f"""Channel: {oc}
+                                            Author: {author}
+                                            Before: {bContent}
+                                            After: {aContent}
+                                            Attachments: {attachment}""")
+
+            await send_channel.send(embed=response)
         except Exception as e:
             print(e)
 
