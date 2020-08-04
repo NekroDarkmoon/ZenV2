@@ -73,7 +73,7 @@ class Wildemount(commands.Cog):
             await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    #                          Creating an lfg
+    #                          Looking up an lfg
     @commands.command(name="lfg", help="List all lfg quests", usage="d/p Description")
     async def lfg(self, ctx, quest_id=None):
         await ctx.message.delete()
@@ -138,6 +138,51 @@ class Wildemount(commands.Cog):
                 entry = f"{record[2]}: **{record[3]}** - {record[4]}"
                 response = emb.gen_embed_green(f"Quest ID: {record[1]}", f"{entry}")
                 await ctx.send(embed=response)
+
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                          Deleting an lfg
+    @commands.command(name="dlfg", help="Delete a posted quest", usage="QuestID")
+    async def dlfg(self, ctx, quest_id=None):
+        await ctx.message.delete()
+
+        # Get vars
+        author = ctx.author.name + '#' + ctx.author.discriminator
+
+        # Validation
+        if quest_id is None:
+            response = emb.gen_embed_yellow('LFG', 'Please enter a QuestID')
+            await ctx.send(embed=response)
+            return
+
+        try:
+            quest_id = int(quest_id)
+        except ValueError:
+            await ctx.send(embed=emb.gen_embed_orange('LFG - Error', 'Error. Please enter a number.'))
+            return
+
+        sql = """SELECT * FROM quest WHERE server_id=$1 AND quest_id=$2"""
+        try:
+            record = await self.bot.pool.fetchrow(sql, ctx.guild.id, quest_id)
+        except Exception as e:
+            print(e)
+            await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
+            return
+
+        if author != record[2]:
+            await ctx.send(embed=emb.gen_embed_yellow("LFG - Error",  "You're not the author of the quest."))
+            return
+
+        sql = """DELETE FROM quest WHERE server_id=$1 AND quest_id=$2"""
+
+        try:
+            await self.bot.pool.execute(sql, ctx.guild.id, quest_id)
+            desc = f"Deleted quest ID'ed {quest_id} by {author}"
+            response = emb.gen_embed_green('Looking for game', desc)
+            await ctx.send(embed=response)
+        except Exception as e:
+            print(e)
+            await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
+            return
 
 
 def setup(bot):
