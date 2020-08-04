@@ -32,7 +32,8 @@ class Wildemount(commands.Cog):
 
     # Cog check
     async def cog_check(self, ctx):
-        return ctx.guild.id == 739684323141353597
+        guilds = [719063399148814418, 739684323141353597]
+        return True if ctx.guild.id in guilds else False
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                          Creating an lfg
