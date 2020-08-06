@@ -28,28 +28,38 @@ log = logging.getLogger(__name__)
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.vc_conn = []
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                Join
     @commands.command(name='join')
     async def join(self, ctx):
+        # Get variables
         member = ctx.author
         voice = getattr(member, 'voice', None)
 
         if voice is not None:
             vc = voice.channel
-            await vc.connect()
+            conn = await vc.connect()
+            self.vc_conn.append(conn)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                Leave
     @commands.command(name='leave')
     async def leave(self, ctx):
+        # Get variables
         member = ctx.author
+        guild = ctx.guild
         voice = getattr(member, 'voice', None)
 
         if voice is not None:
-            vc = voice.channel
-            await vc.connect()
+            conns = self.vc_conn
+            for conn in conns:
+                if conn.guild == guild:
+                    await conn.disconnect()
+                    self.vc_conn.remove(conn)
+
+        print(self.vc_conn)
 
 
 def setup(bot):
