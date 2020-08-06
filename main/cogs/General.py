@@ -94,6 +94,14 @@ class General(commands.Cog):
 
         await ctx.send(embed=e)
 
+    @commands.command(name='inator')
+    async def inator(self, ctx, *, noun):
+        number = random.randint(1000, 3000)
+        response = "I’ve come up with the best plan to take over the Tri-State Area!!!"
+        response += f"Behold the {noun}inator{number}"
+        response = emb.gen_embed_green('Inator3000', response)
+        await ctx.send(embed=response)
+
 
 def setup(bot):
     bot.add_cog(General(bot))
