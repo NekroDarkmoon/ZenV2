@@ -36,7 +36,7 @@ def setup_logging():
         logging.getLogger('discord.http').setLevel(logging.WARNING)
 
         log = logging.getLogger()
-        log.setLevel(logging.DEBUG)
+        log.setLevel(logging.INFO)
         handler = logging.FileHandler(filename='Zen.log', encoding='utf-8', mode='w')
         dt_fmt = '%Y-%m-%d %H:%M:%S'
         fmt = logging.Formatter('[{asctime}] [{levelname:<7}] {name}: {message}', dt_fmt, style='{')
