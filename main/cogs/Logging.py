@@ -2,9 +2,10 @@
 #                                 Imports
 # --------------------------------------------------------------------------
 # Standard library imports
-import re
-import sys
+import logging
 import os
+import sys
+import re
 
 # Third party imports
 import discord # noqa
@@ -16,6 +17,9 @@ from discord.ext import commands
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
 from settings import embeds as emb # noqa
+
+
+log = logging.getLogger(__name__)
 
 
 # --------------------------------------------------------------------------
@@ -78,6 +82,7 @@ class Logging(commands.Cog):
         # Validation
         if before.author.bot:
             return
+
         if (after.edited_at - before.created_at).total_seconds() < 60:
             return
 

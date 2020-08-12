@@ -92,6 +92,13 @@ class Music(commands.Cog):
             vc = voice.channel
             await vc.connect()
 
+            e = emb.gen_embed_green(f"{ctx.author}", f'Connected to {vc}')
+            if member.avatar:
+                url = member.avatar_url
+                e.set_thumbnail(url=url)
+
+            await ctx.send(embed=e)
+
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                Leave
     @commands.command(name='leave')
@@ -103,6 +110,13 @@ class Music(commands.Cog):
         if voice is not None:
             await ctx.voice_client.disconnect()
 
+            e = emb.gen_embed_green(f"{ctx.author}", f'Disconnected from {voice.channel}')
+            if member.avatar:
+                url = member.avatar_url
+                e.set_thumbnail(url=url)
+
+            await ctx.send(embed=e)
+
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                Play
     @commands.command(name='play')
@@ -113,25 +127,14 @@ class Music(commands.Cog):
             ctx.voice_client.play(player,
                                   after=lambda e: print('Player error: %s' % e) if e else None)
 
-        await ctx.send('Now playing: {}'.format(player.title))
-
-    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    #                                Play
-    @commands.command(name='stream')
-    async def stream(self, ctx, *, url):
-
-        async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-            ctx.voice_client.play(player,
-                                  after=lambda e: print('Player error: %s' % e) if e else None)
-
-        await ctx.send('Now playing: {}'.format(player.title))
+        e = emb.gen_embed_green(f'Now Playing: {player.title}', f"Requested by: {ctx.author}")
+        await ctx.send(embed=e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                Before invoke
     @play.before_invoke
     # @yt.before_invoke
-    @stream.before_invoke
+    # @stream.before_invoke
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:
