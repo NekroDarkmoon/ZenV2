@@ -82,9 +82,9 @@ class Logging(commands.Cog):
         # Validation
         if before.author.bot:
             return
-
-        if (after.edited_at - before.created_at).total_seconds() < 60:
-            return
+        if after.edited_at is not None:
+            if (after.edited_at - before.created_at).total_seconds() < 60:
+                return
 
         # Getting Variables
         author = before.author
