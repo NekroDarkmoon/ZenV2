@@ -284,6 +284,37 @@ class Wildemount(commands.Cog):
         except Exception as e:
             print(e)
 
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                       Setting up channel restrictions
+    @commands.Cog.listener()
+    async def on_message(self, message):
+
+        # Validate
+        if message.author.bot:
+            return
+
+        try:
+            roles = message.author.roles
+        except Exception:
+            print(f"User {message.author} has no roles.")
+            return
+
+        for role in roles:
+            if role.name == 'The Crownsguard' or role.name == 'Exceptions':
+                return
+
+        response = emb.gen_embed_orange("Error",
+                                        "Please add relevant tags to your post.")
+
+        if (message.channel.id == 719063951442313307) or (message.channel.id == 719070160014803045):
+            content = message.content
+            if "[" in content and "]" in content:
+                pass
+            else:
+                await message.delete(delay=5)
+                await self.bot.get_channel(message.channel.id).send(embed=response,
+                                                                    delete_after=10)
+
 
 def setup(bot):
     bot.add_cog(Wildemount(bot))
