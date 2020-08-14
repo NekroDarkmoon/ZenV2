@@ -144,6 +144,7 @@ class Leveling(commands.Cog):
     @commands.command(name="givexp")
     @commands.has_permissions(administrator=True)
     async def givexp(self, ctx, member: discord.Member, exp: int):
+        """Gives another member xp"""
         # Validation
         if (exp < 0):
             response = emb.gen_embed_red("Warning!", "You can't give negative exp.")
@@ -207,7 +208,7 @@ class Leveling(commands.Cog):
     #                             Check exp
     @commands.command(name="rank")
     async def rank(self, ctx):
-
+        """Gets your current status on the server"""
         conn = self.bot.pool
 
         try:
@@ -237,17 +238,20 @@ class Leveling(commands.Cog):
 
                 string = f"""You have {texp} exp overall.
 
-                You are level {level} on this server, with {exp} exp. You last gained exp
-                {(ctx.message.created_at - here_fetch["last_exp"]).seconds} seconds ago.
+You are level {level} on this server, with {exp} exp.
+You last gained exp {(ctx.message.created_at - here_fetch["last_exp"]).seconds} seconds ago.
 
-                Level {level+1} requires {nexp} exp: you need {missexp} more.
-                """
+Level {level+1} requires {nexp} exp: you need {missexp} more.\n\n"""
 
             else:
                 string = f"Your adventure on this server hasn't started yet, but you have {texp} exp somewhere else.\n"
 
-            response = emb.gen_embed_cobalt("Your exp", string)
-            await ctx.send(embed=response)
+            e = emb.gen_embed_cobalt(f"{ctx.author}", string)
+            e.set_thumbnail(url=ctx.author.avatar_url)
+            e.add_field(name="XP", value=f"{exp}/{nexp}", inline=True)
+            e.add_field(name="Level", value=level, inline=True)
+            e.add_field(name="Messages", value=here_fetch["msg_amt"], inline=True)
+            await ctx.send(embed=e)
 
         except Exception as e:
             print(e)
@@ -257,6 +261,7 @@ class Leveling(commands.Cog):
     @commands.command(name="theirexp")
     @commands.has_permissions(manage_guild=True)
     async def theirexp(self, ctx, member: discord.Member):
+        """Gets the exp for another member on the server"""
         conn = self.bot.pool
 
         try:
@@ -286,17 +291,20 @@ class Leveling(commands.Cog):
 
                 string = f"""You have {texp} exp overall.
 
-                You are level {level} on this server, with {exp} exp. You last gained exp
-                {(ctx.message.created_at - here_fetch["last_exp"] ).seconds} seconds ago.
+You are level {level} on this server, with {exp} exp. You last gained exp
+{(ctx.message.created_at - here_fetch["last_exp"] ).seconds} seconds ago.
 
-                Level {level+1} requires {nexp} exp: you need {missexp} more.
-                """
+Level {level+1} requires {nexp} exp: you need {missexp} more."""
 
             else:
                 string = f"{member.name}'s adventure on this server hasn't started yet, but they have {texp} exp somewhere else.\n"
 
-            response = emb.gen_embed_cobalt(member.name+"'s exp", string)
-            await ctx.send(embed=response)
+            e = emb.gen_embed_cobalt(f"{member}", string)
+            e.set_thumbnail(url=member.avatar_url)
+            e.add_field(name="XP", value=f"{exp}/{nexp}", inline=True)
+            e.add_field(name="Level", value=level, inline=True)
+            e.add_field(name="Messages", value=here_fetch["msg_amt"], inline=True)
+            await ctx.send(embed=e)
 
         except Exception as e:
             print(e)
@@ -305,6 +313,7 @@ class Leveling(commands.Cog):
     #                             Levels
     @commands.command(name="levels")
     async def levels(self, ctx, max: int = 10):
+        """Lists the exp required for levels"""
         string = ""
 
         if max < 3:
@@ -323,6 +332,7 @@ class Leveling(commands.Cog):
     #                             Ranking
     @commands.command(name="ranking")
     async def ranking(self, ctx, max: int = 10):
+        """Lists top 15 ranking on the server"""
         conn = self.bot.pool
 
         try:
@@ -342,6 +352,8 @@ class Leveling(commands.Cog):
                 rank = rank + 1
                 line = [rank, ctx.guild.get_member(fetched["user_id"]).name, fetched["level"]]
                 table.append(line)
+                if rank > 15:
+                    break
 
             headers = ["Rank", "Name", "Level"]
             content = tabulate.tabulate(table, headers, tablefmt="simple", stralign="left",
@@ -354,8 +366,9 @@ class Leveling(commands.Cog):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                             Role rewards
-    @commands.command(name="goals")
-    async def goals(self, ctx, *args):
+    @commands.command(name="rewards")
+    async def rewards(self, ctx, *args):
+        """Fetches all the possible rewards for levels"""
         conn = self.bot.pool
 
         try:
@@ -363,8 +376,8 @@ class Leveling(commands.Cog):
             fetch = await conn.fetch(sql, ctx.guild.id)
 
             if (fetch == []):
-                response = emb.gen_embed_red("Warning!", """There are no roles yet.\n
-                You can add roles using 'createrole Name Level (Colour)'.""")
+                response = emb.gen_embed_red("Warning!", """There are no roles yet.
+You can add roles using 'createrole Name Level (Colour)'.""")
                 await ctx.send(embed=response)
                 return
 
@@ -388,7 +401,7 @@ class Leveling(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def createrr(self, ctx, rolename: str, level: int,
                        colour: discord.Colour = discord.Colour.default()):
-
+        """Creates a reward role"""
         conn = self.bot.pool
         try:
             # checking if the role already exists, or if there is another role at that level
@@ -427,7 +440,7 @@ class Leveling(commands.Cog):
     @commands.command(name="deleterr")
     @commands.has_permissions(manage_guild=True)
     async def deleterr(self, ctx, rolename: str):
-
+        """Deletes a reward role"""
         conn = self.bot.pool
 
         try:
