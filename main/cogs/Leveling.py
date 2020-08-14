@@ -63,7 +63,7 @@ async def leveling_up(channel, guild, conn, member, level, newexp):
 
         string += "Congratulations!"
         response = emb.gen_embed_cobalt("", string)
-        await channel.send(embed=response, delete_after=8)
+        await channel.send(embed=response, delete_after=10)
     except Exception as e:
         print(e)
 
@@ -245,6 +245,12 @@ Level {level+1} requires {nexp} exp: you need {missexp} more.\n\n"""
 
             else:
                 string = f"Your adventure on this server hasn't started yet, but you have {texp} exp somewhere else.\n"
+
+            # Validation
+            if 'nexp' not in locals():
+                response = emb.gen_embed_green("", "Sorry, who?")
+                await ctx.send(embed=response)
+                return
 
             e = emb.gen_embed_cobalt(f"{ctx.author}", string)
             e.set_thumbnail(url=ctx.author.avatar_url)
