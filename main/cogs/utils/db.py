@@ -37,15 +37,27 @@ async def create_schemas(conn):
 
     await conn.execute(sql)
 
-    # Table for leveling system
+        # Table for leveling system
     sql = """CREATE TABLE IF NOT EXISTS lb(server_id BIGINT NOT NULL,
                                            user_id BIGINT NOT NULL,
-                                           msg_amt BIGINT NOT NULL,
-                                           total_exp BIGINT not NULL,
-                                           level BIGINT NOT NULL);"""
+                                           last_exp TIMESTAMP NOT NULL,
+                                           msg_amt INTEGER NOT NULL,
+                                           total_exp INTEGER not NULL,
+                                           level INTEGER NOT NULL);"""
 
     await conn.execute(sql)
+    
+        # Table for roles (for the leveling system)
+    sql = """CREATE TABLE IF NOT EXISTS roles(rolename TEXT NOT NULL,
+                                           server_id BIGINT NOT NULL,
+                                           role_id BIGINT NOT NULL,
+                                           level INTEGER NOT NULL,
+                                           description TEXT);"""
 
+    await conn.execute(sql)
+    
+    
+    
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Custom tables for certain servers
     sql = '''CREATE TABLE IF NOT EXISTS quest(server_id INTEGER NOT NULL,
