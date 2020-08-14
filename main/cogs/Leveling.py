@@ -258,9 +258,9 @@ Level {level+1} requires {nexp} exp: you need {missexp} more.\n\n"""
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                             Check exp
-    @commands.command(name="theirexp")
+    @commands.command(name="theirxp")
     @commands.has_permissions(manage_guild=True)
-    async def theirexp(self, ctx, member: discord.Member):
+    async def theirxp(self, ctx, member: discord.Member):
         """Gets the exp for another member on the server"""
         conn = self.bot.pool
 
