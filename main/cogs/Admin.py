@@ -4,6 +4,8 @@
 #                                 Imports
 # --------------------------------------------------------------------------
 # Standard library imports
+import asyncpg
+import datetime
 import logging
 import sys
 import os
@@ -95,10 +97,11 @@ class Admin(commands.Cog):
     @commands.command(name="userinfo", pass_context=True)
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
-    async def userinfo(self, ctx, member: discord.Member):
+    async def userinfo(self, ctx, *, member: discord.Member):
         """Displays information about a user"""
         try:
             # Variables
+            conn = self.bot.pool
             roles = [role.name.replace('@', '@\u200b') for role in getattr(member, 'roles', [])]
             shared = sum(g.get_member(member.id) is not None for g in self.bot.guilds)
 
@@ -119,6 +122,14 @@ class Admin(commands.Cog):
             if roles:
                 embed.add_field(name='Roles', value=', '.join(roles) if len(roles) < 10 else
                                 f'{len(roles)} roles', inline=False)
+
+            # Get last message
+            sql = """SELECT * FROM lb WHERE server_id= $1 AND user_id = $2; """
+            data = await conn.fetchrow(sql, member.guild.id, member.id)
+            if data is not None:
+                last_msg = data[2]
+                last_msg = last_msg.strftime("%c")
+                embed.add_field(name="Last Message at", value=last_msg, inline=False)
 
             color = member.colour
             if color.value:
