@@ -2,7 +2,7 @@ import asyncio
 import asyncpg
 from bs4 import BeautifulSoup
 import datetime
-
+import sqlite3
 
 print('Starting connection')
 URL = "https://mee6.xyz/leaderboard/719063399148814418"
@@ -80,6 +80,22 @@ async def send(data, conn):
         except Exception as e:
             print(e)
 
+    # Getting data from sqlite and putting it in this ish
+    try:
+        sqconn = sqlite3.connect('cogs.db')
+        sqcursor = sqconn.cursor()
+
+        sqcursor.execute('''SELECT * FROM lfg''')
+        records = sqcursor.fetchall()
+        for record in records:
+            print(record)
+            sql = """ INSERT INTO quest VALUES ( $1, $2, $3, $4, $5 )"""
+            await conn.execute(sql, record[0], record[1], record[2], record[3], record[4])
+    except Exception as e:
+        print(e)
+
+    records = await conn.fetch('SELECT * FROM quest')
+    print(records)
 
 loop = asyncio.get_event_loop()
 conn = loop.run_until_complete(run())

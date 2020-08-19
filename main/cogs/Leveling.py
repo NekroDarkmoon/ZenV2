@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 # Level function -- So level up at 100, 250, 450...
 def level_up(level):
     basexp = 400
-    inc = 50
+    inc = 500
     return int(basexp*level + inc*level*(level-1)/2)
 
 

@@ -58,8 +58,8 @@ async def create_schemas(conn):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Custom tables for certain servers
-    sql = '''CREATE TABLE IF NOT EXISTS quest(server_id INTEGER NOT NULL,
-                                              quest_id INTEGER UNIQUE,
+    sql = '''CREATE TABLE IF NOT EXISTS quest(server_id BIGINT NOT NULL,
+                                              quest_id BIGINT UNIQUE,
                                               author TEXT NOT NULL,
                                               quest_type text NOT NULL,
                                               msg TEXT);'''
