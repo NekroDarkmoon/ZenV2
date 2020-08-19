@@ -1,6 +1,5 @@
 import asyncio
 import asyncpg
-import requests
 from bs4 import BeautifulSoup
 import datetime
 
@@ -60,11 +59,26 @@ async def send(data, conn):
         server_id = 719063399148814418
         user_id = int(user['id'])
         last_exp = datetime.datetime.now()
-        msg_amt = int(user['stat[0]'].replace('.', '').replace('k', '000'))
-        total_exp = int(user['stat[1]'].replace('.', '').replace('k', '000'))
+        # data maniputation
+        msg_amt = user['stat[0]']
+        if 'k' in msg_amt:
+            msg_amt = int(float(msg_amt.replace('k', '')) * 1000)
+        else:
+            msg_amt = int(msg_amt)
+
+        total_exp = user['stat[1]']
+        if 'k' in total_exp:
+            total_exp = int(float(total_exp.replace('k', '')) * 1000)
+        else:
+            total_exp = int(total_exp)
+
         level = int(user['stat[2]'])
         sql = """INSERT INTO lb VALUES ( $1, $2, $3, $4, $5, $6 )"""
-        await conn.execute(sql, server_id, user_id, last_exp, msg_amt, total_exp, level)
+        try:
+            print(user)
+            await conn.execute(sql, server_id, user_id, last_exp, msg_amt, total_exp, level)
+        except Exception as e:
+            print(e)
 
 
 loop = asyncio.get_event_loop()

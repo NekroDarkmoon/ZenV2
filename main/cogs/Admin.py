@@ -32,6 +32,7 @@ class Admin(commands.Cog):
         self.bot = bot
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                                   Kick
     @commands.command(name="kick", pass_context=True, help="Kicks a user from the server")
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
@@ -54,6 +55,7 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                                   Ban
     @commands.command(name="ban", pass_context=True, help="Bans the user from the server")
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
@@ -74,6 +76,7 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                                   Unban
     @commands.command(name="unban", pass_context=True, help="Unbans the user from the server")
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
@@ -94,6 +97,7 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                                   Userinfo
     @commands.command(name="userinfo", pass_context=True)
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
