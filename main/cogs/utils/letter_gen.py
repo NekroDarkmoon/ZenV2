@@ -7,6 +7,7 @@
 import logging
 import os
 import sys
+import textwrap
 
 # Third party imports
 import discord # noqa
@@ -20,27 +21,66 @@ from PIL import Image, ImageDraw, ImageFont
 # from settings import embeds as emb # noqa
 
 log = logging.getLogger(__name__)
-path = "images/"
+path = "./main/cogs/util/images/"
 error_log = []
+
+
+# --------------------------------------------------------------------------
+#                            Adding signature
+# --------------------------------------------------------------------------
+def add_signature(bg, msg, ctn):
+    try:
+        # Get size of image
+        width, height = bg.size
+
+        # Get singature data
+        signature = ImageDraw.Draw(bg)
+        fnt = ImageFont.truetype(f'{path}DancingScript.ttf', 30)
+        w, h = signature.textsize(msg, font=fnt)
+
+        # Calc location
+        place_w = width - (165 + w)
+        place_h = 300 + ctn[1] + 20
+
+        # Draw signature
+        signature.multiline_text((place_w, place_h), msg, font=fnt, fill='black', align='right')
+
+        error_log.append('Added Signature')
+        return (bg)
+    except Exception as e:
+        print(e)
+        error_log.append('Erro Adding Signature')
+        return
 
 
 # --------------------------------------------------------------------------
 #                            Adding content
 # --------------------------------------------------------------------------
-def add_content(bg, msg):
+def add_content(bg, msg, ctn):
     try:
         # Get size of image
         width, height = bg.size
+        # msg = "\n".join(wrap(msg, width=60))
+        wrapper = textwrap.TextWrapper(width=60, replace_whitespace=False, drop_whitespace=False)
+        msg = wrapper.fill(text=msg)
 
         # Get content data
         content = ImageDraw.Draw(bg)
-        fnt = ImageFont.truetype(f'{path}DancingScript.ttf', 40)
+        fnt = ImageFont.truetype(f'{path}DancingScript.ttf', 30)
         w, h = content.textsize(msg, font=fnt)
 
+        # Calc location
+        place_w = 160
+        if ctn is True:
+            place_h = 250
+        else:
+            place_h = 300
+
         # Draw content
+        content.multiline_text((place_w, 300), msg, font=fnt, fill='black')
 
         error_log.append('Added Content')
-        return bg
+        return bg, (w, h)
     except Exception as e:
         print(e)
         error_log.append('Error adding content')
@@ -57,7 +97,7 @@ def add_title(bg, msg):
 
         # Get title data
         title = ImageDraw.Draw(bg)
-        fnt = ImageFont.truetype(f"{path}OldeEnglish.ttf", 80)
+        fnt = ImageFont.truetype(f"{path}OldeEnglish.ttf", 70)
         w, h = title.textsize(msg, font=fnt)
         place_w = int((width - w) / 2)
 
@@ -65,7 +105,7 @@ def add_title(bg, msg):
         title.text((place_w, 200), msg, font=fnt, fill='black')
         error_log.append('Added title')
 
-        return bg
+        return bg, (w, h)
 
     except Exception as e:
         print(e)
@@ -91,35 +131,30 @@ def get_bg():
 # --------------------------------------------------------------------------
 #                                 Main
 # --------------------------------------------------------------------------
-def main():
-    # sort out vars
-    title = "Help Wanted"
-    content = """
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
-industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type
-and scrambled it to make a type specimen book. It has survived not only five centuries, but also
-the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the
-1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with
-desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-    """
+def main(title=None, content=None, signature=None, skip=True):
 
     # Get image from file
     bg = get_bg()
 
     # Adding a title
     if title:
-        bg = add_title(bg, title)
+        bg, skip = add_title(bg, title)
+        print(bg)
 
     # Adding content
-    bg = add_content(bg, content)
+    bg, content_details = add_content(bg, content, skip)
+    print(bg)
 
     # Adding signature
-    bg = add_signature(bg, signature)
+    bg = add_signature(bg, signature, content_details)
+    print(bg)
 
     try:
         bg.save('pil_text_font.png')
+        return bg
     except Exception as e:
         print(e)
+        return
 
 
 if __name__ == "__main__":

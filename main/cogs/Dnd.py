@@ -99,7 +99,9 @@ class Dnd(commands.Cog):
     #                                   Letter gen
     @commands.command(name="gletter")
     async def gletter(self, ctx):
-        lettergen.main()
+
+
+        image = lettergen.main()
 
 
 def setup(bot):
