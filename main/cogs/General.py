@@ -5,7 +5,6 @@
 # --------------------------------------------------------------------------
 # Standard library imports
 import logging
-import numpy as np
 import random
 import sys
 import os
@@ -37,6 +36,8 @@ class General(commands.Cog):
         response = emb.gen_embed_green('Ping!', description)
         await ctx.send(embed=response)
 
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                                   Source code
     @commands.command(name='source', help="Gets the bot's source code and trello page.")
     async def source(self, ctx, *args):
         trello = ''
@@ -51,56 +52,30 @@ class General(commands.Cog):
         except Exception as e:
             print(e)
 
-    @commands.command(name='weather', help="Generates the weather for the world")
-    async def weather(self, ctx):
-        # Create embed
-        e = emb.gen_embed_cobalt('Weather Generator', None)
-
-        # Generate Precipitation
-        precip = ['No Precipitation', 'Light rain or snowfall', 'Heavy rain or snowfall']
-        precip = np.random.choice(precip, p=[0.6, 0.25, 0.15])
-        e.add_field(name='Precipitation', value=precip, inline=False)
-
-        # Generate Temps
-        roll = random.randint(1, 4)
-        temp = ['Normal for the season', f'{roll*10} degrees Fahrenheit colder than normal',
-                f'{roll*10} degrees Fahrenheit colder than normal']
-        temp = np.random.choice(temp, p=[0.7, 0.15, 0.15])
-        e.add_field(name='Temperature', value=temp, inline=False)
-
-        # Generate Wind
-        wind = ['No Wind', 'Light Wind', 'Medium Wind', 'Heavy/Strong Wind']
-        wind = np.random.choice(wind, p=[0.1, 0.55, 0.2, 0.15])
-        e.add_field(name='Wind', value=wind, inline=False)
-
-        # Generate speeds
-        roll = random.randint(1, 6) + random.randint(1, 6)
-        direction = ['North', 'North-East', 'East', 'South-East', 'South',
-                     'South-West', 'West', 'North-West']
-
-        if wind == 'Medium Wind':
-            speed = [50, 40, 30, 20, 10, 0, 0, 10, 20, 30, 40, 50]
-            speed = str(speed[roll-1]) + ' feet'
-            e.add_field(name='Speed', value=speed, inline=False)
-            direction = np.random.choice(direction)
-            e.add_field(name='Direction', value=direction, inline=False)
-
-        elif wind == 'Heavy/Strong Wind':
-            speed = [110, 100, 90, 80, 70, 60, 60, 70, 80, 90, 100, 110]
-            speed = str(speed[roll-1]) + ' feet'
-            e.add_field(name='Speed', value=speed, inline=True)
-            direction = np.random.choice(direction)
-            e.add_field(name='Direction', value=direction, inline=False)
-
-        await ctx.send(embed=e)
-
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                                   Inator
     @commands.command(name='inator')
     async def inator(self, ctx, *, noun):
+        """ Create an inator! \nUsage: inator [word]"""
         number = random.randint(1000, 3000)
         response = "I’ve come up with the best plan to take over the Tri-State Area!!! "
         response += f"Behold the {noun}inator{number}"
         response = emb.gen_embed_green('Inator3000', response)
         await ctx.send(embed=response)
+
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                               Invite Generator
+    @commands.command(name="invite")
+    async def invite(self, ctx):
+        """ Get an invite for your server """
+        link = "https://discord.com/api/oauth2/authorize?client_id=607734719853101066&permissions=8&scope=bot"
+        e = discord.Embed(
+            title='Invite Link',
+            url=link,
+            color=0x63ddff
+        )
+        e.set_thumbnail(url=self.bot.get_user(607734719853101066).avatar_url)
+        await ctx.send(embed=e)
 
 
 def setup(bot):
