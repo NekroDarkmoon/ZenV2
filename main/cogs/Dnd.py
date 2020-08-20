@@ -99,9 +99,57 @@ class Dnd(commands.Cog):
     #                                   Letter gen
     @commands.command(name="gletter")
     async def gletter(self, ctx):
+        """ Creates a letter handout."""
 
+        # Create initial embeds
+        msg = "Let's begin the process. Please type the title on the letter or c to cancel"
+        msg += "\n(Note: Title can be left empty by typing None)"
 
-        image = lettergen.main()
+        # Send inital embed
+        e = emb.gen_embed_cobalt('Creating Letter', "")
+        preview = await ctx.send(msg, embed=e)
+
+        # Getting the title
+        title = await self.bot.wait_for('message', timeout=20)
+
+        if title.content == 'c':
+            return
+        if title.content.lower() == 'none':
+            title.content = None
+
+        # Getting Content
+        msg = 'Next type in the content or enter c to cancel...'
+        e = emb.gen_embed_cobalt('Creating Letter', f"{msg}")
+        e.set_thumbnail(url=ctx.author.avatar_url)
+        e.add_field(name='Title', value=title.content, inline=False)
+
+        await preview.edit(content=msg, embed=e)
+
+        content = await self.bot.wait_for('message', timeout=15)
+
+        if title.content == 'c':
+            return
+
+        e.add_field(name='Content', value=content.content, inline=False)
+
+        # Getting the signature
+        await preview.edit(content="Next enter the signature", embed=e)
+        signature = await self.bot.wait_for('message', timeout=15)
+
+        if signature.content == 'c':
+            return
+        if signature.content.lower() == 'none':
+            signature.content = None
+
+        e.add_field(name='Signature', value=signature.content, inline=False)
+        await preview.edit(content='Generating...', embed=e)
+
+        async with ctx.typing():
+            image = lettergen.main(title.content, content.content, signature.content)
+            file = discord.File(filename="circle.png", fp=image)
+        await preview.delete()
+
+        await ctx.send(file=file)
 
 
 def setup(bot):

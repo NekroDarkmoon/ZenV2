@@ -8,6 +8,7 @@ import logging
 import os
 import sys
 import textwrap
+from io import BytesIO
 
 # Third party imports
 import discord # noqa
@@ -21,7 +22,7 @@ from PIL import Image, ImageDraw, ImageFont
 # from settings import embeds as emb # noqa
 
 log = logging.getLogger(__name__)
-path = "./main/cogs/util/images/"
+path = "./main/cogs/utils/images/"
 error_log = []
 
 
@@ -77,7 +78,7 @@ def add_content(bg, msg, ctn):
             place_h = 300
 
         # Draw content
-        content.multiline_text((place_w, 300), msg, font=fnt, fill='black')
+        content.multiline_text((place_w, place_h), msg, font=fnt, fill='black')
 
         error_log.append('Added Content')
         return bg, (w, h)
@@ -131,27 +132,29 @@ def get_bg():
 # --------------------------------------------------------------------------
 #                                 Main
 # --------------------------------------------------------------------------
-def main(title=None, content=None, signature=None, skip=True):
-
+def main(title, content, signature, skip=True):
     # Get image from file
     bg = get_bg()
 
     # Adding a title
     if title:
         bg, skip = add_title(bg, title)
-        print(bg)
 
     # Adding content
     bg, content_details = add_content(bg, content, skip)
-    print(bg)
 
     # Adding signature
     bg = add_signature(bg, signature, content_details)
-    print(bg)
 
     try:
-        bg.save('pil_text_font.png')
-        return bg
+        # bg.save('pil_text_font.png')
+        print(error_log)
+
+        final_buffer = BytesIO()
+
+        bg.save(final_buffer, "png")
+        final_buffer.seek(0)
+        return final_buffer
     except Exception as e:
         print(e)
         return
