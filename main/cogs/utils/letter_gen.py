@@ -23,7 +23,6 @@ from PIL import Image, ImageDraw, ImageFont
 
 log = logging.getLogger(__name__)
 path = "./main/cogs/utils/images/"
-error_log = []
 
 
 # --------------------------------------------------------------------------
@@ -36,7 +35,7 @@ def add_signature(bg, msg, ctn):
 
         # Get singature data
         signature = ImageDraw.Draw(bg)
-        fnt = ImageFont.truetype(f'{path}DancingScript.ttf', 30)
+        fnt = ImageFont.truetype(f'{path}DancingScript.ttf', 35)
         w, h = signature.textsize(msg, font=fnt)
 
         # Calc location
@@ -46,11 +45,9 @@ def add_signature(bg, msg, ctn):
         # Draw signature
         signature.multiline_text((place_w, place_h), msg, font=fnt, fill='black', align='right')
 
-        error_log.append('Added Signature')
         return (bg)
     except Exception as e:
         print(e)
-        error_log.append('Erro Adding Signature')
         return
 
 
@@ -62,29 +59,41 @@ def add_content(bg, msg, ctn):
         # Get size of image
         width, height = bg.size
         # msg = "\n".join(wrap(msg, width=60))
-        wrapper = textwrap.TextWrapper(width=60, replace_whitespace=False, drop_whitespace=False)
-        msg = wrapper.fill(text=msg)
-
-        # Get content data
-        content = ImageDraw.Draw(bg)
-        fnt = ImageFont.truetype(f'{path}DancingScript.ttf', 30)
-        w, h = content.textsize(msg, font=fnt)
-
-        # Calc location
+        lines = msg.splitlines()
+        print(lines)
+        # Calc locations
         place_w = 160
         if ctn is True:
             place_h = 250
         else:
             place_h = 300
 
-        # Draw content
-        content.multiline_text((place_w, place_h), msg, font=fnt, fill='black')
+        for line in lines:
+            wrapper = textwrap.TextWrapper(width=50, replace_whitespace=False, drop_whitespace=False)
+            line = wrapper.fill(text=line)
+            print(line)
 
-        error_log.append('Added Content')
+            # Get Content data
+            content = ImageDraw.Draw(bg)
+            fnt = ImageFont.truetype(f'{path}DancingScript.ttf', 35)
+            w, h = content.textsize(text=line, font=fnt)
+            print(h)
+            print(place_h)
+            # Draw content
+            if len(line) > 50:
+                content.multiline_text((place_w, place_h), line, font=fnt, fill='black')
+            else:
+                content.text((place_w, place_h), line, font=fnt, fill='black')
+
+            # Calc new position
+            if line == '':
+                place_h += 15 + h
+            else:
+                place_h += 35 + h
+
         return bg, (w, h)
     except Exception as e:
         print(e)
-        error_log.append('Error adding content')
         return
 
 
@@ -104,13 +113,11 @@ def add_title(bg, msg):
 
         # Draw title
         title.text((place_w, 200), msg, font=fnt, fill='black')
-        error_log.append('Added title')
 
         return bg, (w, h)
 
     except Exception as e:
         print(e)
-        error_log.append('Error Adding title')
         return
 
 
@@ -121,11 +128,9 @@ def get_bg():
     # Get background
     try:
         bg = Image.open(f"{path}Scroll.png")
-        error_log.append('Loaded background')
         return bg
     except Exception as e:
         print(e)
-        error_log.append('Error Loading bg')
         return
 
 
@@ -144,14 +149,12 @@ def main(title, content, signature, skip=True):
     bg, content_details = add_content(bg, content, skip)
 
     # Adding signature
-    bg = add_signature(bg, signature, content_details)
+    if signature:
+        bg = add_signature(bg, signature, content_details)
 
     try:
         # bg.save('pil_text_font.png')
-        print(error_log)
-
         final_buffer = BytesIO()
-
         bg.save(final_buffer, "png")
         final_buffer.seek(0)
         return final_buffer
