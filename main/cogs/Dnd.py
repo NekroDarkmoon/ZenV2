@@ -11,6 +11,7 @@ import os
 import sys
 
 # Third party imports
+import asyncio
 import discord # noqa
 from discord.ext import commands
 
@@ -20,7 +21,6 @@ BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
 from settings import embeds as emb # noqa
 from utils import npc_gen as npcgen # noqa
-from utils import letter_gen as lettergen # noqa
 
 
 log = logging.getLogger(__name__)
@@ -100,46 +100,77 @@ class Dnd(commands.Cog):
     @commands.command(name="gletter")
     async def gletter(self, ctx):
         """ Creates a letter handout."""
+        from utils import letter_gen as lettergen # noqa
+
+        # Get variables
+        author = ctx.author
+
+        def check(message):
+            return author == message.author
 
         # Create initial embeds
         msg = "Let's begin the process. Please type the title on the letter or c to cancel"
-        msg += "\n(Note: Title can be left empty by typing None)"
+        msg += "\n(Note: Title and Signature can be left empty by typing None.)\n"
+        msg += "(Note: Every section has a 30 secs time limit.)"
 
         # Send inital embed
         e = emb.gen_embed_cobalt('Creating Letter', "")
         preview = await ctx.send(msg, embed=e)
 
         # Getting the title
-        title = await self.bot.wait_for('message', timeout=20)
+        try:
+            title = await self.bot.wait_for('message', timeout=30, check=check)
+        except asyncio.TimeoutError:
+            await ctx.channel.send('Timed out. 👎')
+            return
 
         if title.content == 'c':
             return
-        if title.content.lower() == 'none':
+        elif title.content.lower() == 'none':
             title.content = None
+        else:
+            title.content = str(title.content)
 
         # Getting Content
         msg = 'Next type in the content or enter c to cancel...'
-        e = emb.gen_embed_cobalt('Creating Letter', f"{msg}")
+        e = emb.gen_embed_cobalt('Creating Letter', "")
         e.set_thumbnail(url=ctx.author.avatar_url)
         e.add_field(name='Title', value=title.content, inline=False)
 
         await preview.edit(content=msg, embed=e)
 
-        content = await self.bot.wait_for('message', timeout=15)
-
-        if title.content == 'c':
+        try:
+            content = await self.bot.wait_for('message', timeout=30, check=check)
+        except asyncio.TimeoutError:
+            await ctx.channel.send('Timed out. 👎')
             return
 
-        e.add_field(name='Content', value=content.content, inline=False)
+        if content.content == 'c':
+            return
+        else:
+            content.content = str(content.content)
+            if len(content.content) > 770:
+                content.content = content.content[:770]
+                val = f'{content.content[:500]}...'
+            val = content.content
+
+        e.add_field(name='Content', value=val, inline=False)
 
         # Getting the signature
         await preview.edit(content="Next enter the signature", embed=e)
-        signature = await self.bot.wait_for('message', timeout=15)
+
+        try:
+            signature = await self.bot.wait_for('message', timeout=30, check=check)
+        except asyncio.TimeoutError:
+            await ctx.channel.send('Timed out. 👎')
+            return
 
         if signature.content == 'c':
             return
-        if signature.content.lower() == 'none':
+        elif signature.content.lower() == 'none':
             signature.content = None
+        else:
+            signature.content = str(signature.content)
 
         e.add_field(name='Signature', value=signature.content, inline=False)
         await preview.edit(content='Generating...', embed=e)
