@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------
 #                                 Main
 # --------------------------------------------------------------------------
-class Settings(commands.Cog):
+class Owner(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -34,6 +34,8 @@ class Settings(commands.Cog):
         owners = [563066232593448990, 431499845644320770, 157433182331863040]
         return True if ctx.author.id in owners else False
 
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                               Load Cog
     @commands.command(name="load", pass_context="True")
     async def load(self, ctx, extension):
         try:
@@ -46,6 +48,8 @@ class Settings(commands.Cog):
             response = emb.gen_embed_orange("System Alert", f"{extension} failed to load")
             await ctx.send(embed=response)
 
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                              Unlaod Cog
     @commands.command(name="unload", pass_context="True")
     async def unload(self, ctx, extension):
         try:
@@ -58,6 +62,8 @@ class Settings(commands.Cog):
             response = emb.gen_embed_orange("System Alert", f"{extension} failed to load")
             await ctx.send(embed=response)
 
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                               Reload Cog
     @commands.command(name="reload", pass_context="True")
     async def reload(self, ctx, extension):
         try:
@@ -71,6 +77,49 @@ class Settings(commands.Cog):
             response = emb.gen_embed_orange("System Alert", f"{extension} failed to load")
             await ctx.send(embed=response)
 
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                       Setting up channel restrictions
+    @commands.command()
+    async def users(self, ctx):
+        try:
+            users = self.bot.users
+            for user in users:
+                print(user.name + ": " + str(user.id))
+        except Exception as e:
+            print(e)
+
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                              Drop tables
+    @commands.command(name="drop")
+    async def drop(self, ctx, db: str):
+
+        conn = self.bot.pool
+
+        try:
+            if (db == "lb"):
+                await conn.execute("""DROP TABLE lb;""")
+                response = emb.gen_embed_red("Warning!", "Table lb deleted.")
+                await ctx.send(embed=response)
+
+            elif (db == "roles"):
+
+                fetchrole = await conn.fetch("""SELECT * FROM roles""")
+
+                print(fetchrole)
+                for fetched in fetchrole:
+                    await self.bot.get_guild(fetched["server_id"]).get_role(fetched["role_id"]).delete()
+
+                await conn.execute("""DROP TABLE roles;""")
+                response = emb.gen_embed_red("Warning!", "Table roles deleted.")
+                await ctx.send(embed=response)
+
+            else:
+                response = emb.gen_embed_red("Warning!", "That's not a table.")
+                await ctx.send(embed=response)
+
+        except Exception as e:
+            print(e)
+
 
 def setup(bot):
-    bot.add_cog(Settings(bot))
+    bot.add_cog(Owner(bot))

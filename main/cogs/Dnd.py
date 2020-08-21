@@ -4,8 +4,9 @@
 #                                 Imports
 # --------------------------------------------------------------------------
 # Standard library imports
-import sys
+import logging
 import os
+import sys
 
 # Third party imports
 import discord # noqa
@@ -17,6 +18,9 @@ BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
 from settings import embeds as emb # noqa
 from utils import npc_gen as npcgen # noqa
+
+
+log = logging.getLogger(__name__)
 
 
 # --------------------------------------------------------------------------

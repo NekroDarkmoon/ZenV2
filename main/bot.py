@@ -164,7 +164,3 @@ class Zen(commands.Bot):
             super().run(self.configs["token"], reconnect=True)
         except Exception as e:
             print(e)
-
-# if __name__ == "__main__":
-#     bot = Zen()
-#     bot.run(configs["token"])
