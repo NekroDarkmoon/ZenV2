@@ -40,7 +40,7 @@ def add_signature(bg, msg, ctn):
 
         # Calc location
         place_w = width - (165 + w)
-        place_h = 300 + ctn[1] + 20
+        place_h = ctn[1] + 20
 
         # Draw signature
         signature.multiline_text((place_w, place_h), msg, font=fnt, fill='black', align='right')
@@ -60,7 +60,7 @@ def add_content(bg, msg, ctn):
         width, height = bg.size
         # msg = "\n".join(wrap(msg, width=60))
         lines = msg.splitlines()
-        print(lines)
+
         # Calc locations
         place_w = 160
         if ctn is True:
@@ -71,14 +71,12 @@ def add_content(bg, msg, ctn):
         for line in lines:
             wrapper = textwrap.TextWrapper(width=50, replace_whitespace=False, drop_whitespace=False)
             line = wrapper.fill(text=line)
-            print(line)
 
             # Get Content data
             content = ImageDraw.Draw(bg)
             fnt = ImageFont.truetype(f'{path}DancingScript.ttf', 35)
             w, h = content.textsize(text=line, font=fnt)
-            print(h)
-            print(place_h)
+
             # Draw content
             if len(line) > 50:
                 content.multiline_text((place_w, place_h), line, font=fnt, fill='black')
@@ -91,7 +89,7 @@ def add_content(bg, msg, ctn):
             else:
                 place_h += 35 + h
 
-        return bg, (w, h)
+        return bg, (w, (place_h))
     except Exception as e:
         print(e)
         return
