@@ -174,9 +174,15 @@ class Wildemount(commands.Cog):
             await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
             return
 
-        if author != record[2]:
-            await ctx.send(embed=emb.gen_embed_yellow("LFG - Error",
-                                                      "You're not the author of the quest."))
+        permissions = ctx.author.top_role
+        print(permissions.name)
+
+        try:
+            if (author != record[2]) and (permissions.id != 719064378296762399):
+                await ctx.send(embed=emb.gen_embed_yellow("LFG - Error",
+                                                          "You're not the author of the quest."))
+                return
+        except Exception:
             return
 
         sql = """DELETE FROM quest WHERE server_id=$1 AND quest_id=$2"""
@@ -314,6 +320,18 @@ class Wildemount(commands.Cog):
                 await message.delete(delay=5)
                 await self.bot.get_channel(message.channel.id).send(embed=response,
                                                                     delete_after=10)
+
+        if (message.channel.id == 746124528312385576):
+            content = message.content
+            temp = "[entry]"
+            if temp in content.lower():
+                await message.add_reaction('\<:upvote:741279182109147286>')
+                pass
+            else:
+                e = emb.gen_embed_red('Error',
+                                      'Please mark your entry with [Entry]')
+                await message.delete(delay=8)
+                await self.bot.get_channel(message.channel.id).send(embed=e, delete_after=10)
 
 
 def setup(bot):
