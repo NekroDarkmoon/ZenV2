@@ -99,7 +99,10 @@ class Dnd(commands.Cog):
     #                                   Letter gen
     @commands.command(name="gletter")
     async def gletter(self, ctx):
-        """ Creates a letter handout."""
+        """ Creates a letter handout. Asks for a Title(Optional), Content and Signature(Optional).
+
+            The command has a timeout of 30 secs at each stage."""
+
         from utils import letter_gen as lettergen # noqa
 
         # Get variables
@@ -181,6 +184,25 @@ class Dnd(commands.Cog):
         await preview.delete()
 
         await ctx.send(file=file)
+
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                                   Letter gen
+    @commands.command(name='gspellbook')
+    async def gspellbook(self, ctx, wiz_level):
+        """ Generates a spellbook for a wizard.
+
+        Usage: gspellbook level[Optional]"""
+
+        # Get vars
+
+        # Math
+
+        # Import and Call module
+
+        # Display
+
+        # Cleanup
+        pass
 
 
 def setup(bot):
