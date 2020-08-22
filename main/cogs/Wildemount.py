@@ -325,7 +325,16 @@ class Wildemount(commands.Cog):
             temp = "[entry]"
             if temp in content.lower():
                 await message.add_reaction('\<:upvote:741279182109147286>')
-                pass
+
+                # Get vars
+                author = message.author.name
+                created = message.created_at
+                with open('event.txt', 'a') as fp:
+                    msg = f"Author: {author} at {created}\n"
+                    msg += f"NPC: \n {content} \n"
+                    msg += "-------------------------------------------------------"
+                    fp.write(msg)
+
             else:
                 e = emb.gen_embed_red('Error',
                                       'Please mark your entry with [Entry]')
