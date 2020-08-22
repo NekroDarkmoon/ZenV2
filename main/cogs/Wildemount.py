@@ -174,11 +174,10 @@ class Wildemount(commands.Cog):
             await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
             return
 
-        permissions = ctx.author.top_role
-        print(permissions.name)
+        permissions = ctx.author.guild_permissions
 
         try:
-            if (author != record[2]) and (permissions.id != 719064378296762399):
+            if (author != record[2]) and not permissions.administrator:
                 await ctx.send(embed=emb.gen_embed_yellow("LFG - Error",
                                                           "You're not the author of the quest."))
                 return
