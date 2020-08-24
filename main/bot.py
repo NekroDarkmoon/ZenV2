@@ -48,14 +48,15 @@ def load_cogs(bot):
 #                                 _prefix_callable
 # --------------------------------------------------------------------------
 def _prefix_callable(bot, msg):
-    user_id = bot.user.id
-    base = [f'<@!{user_id}> ', f'<@{user_id}> ']
-    if msg.guild is None:
-        base.append('?')
-        base.append('~')
-    else:
-        base.extend(bot.prefixes.get(msg.guild.id, ['?', '~']))
-    return base
+    # user_id = bot.user.id
+    # base = [f'<@!{user_id}> ', f'<@{user_id}> ']
+    # if msg.guild is None:
+    #     base.append('?')
+    #     base.append('~')
+    # else:
+    #     base.extend(bot.prefixes.get(msg.guild.id, ['?', '~']))
+    # return base
+    return bot.configs['prefix']
 
 
 # --------------------------------------------------------------------------
@@ -126,7 +127,7 @@ class EmbedHelpCommand(commands.HelpCommand):
 # --------------------------------------------------------------------------
 class Zen(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix='~', description=description, pm_help=None,
+        super().__init__(command_prefix=_prefix_callable, description=description, pm_help=None,
                          help_attrs=dict(hidden=True), fetch_offline_members=True,
                          heartbeat_timeout=150.0, help_command=EmbedHelpCommand())
 
