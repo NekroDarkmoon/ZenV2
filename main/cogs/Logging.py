@@ -52,6 +52,8 @@ class Logging(commands.Cog):
         attachment = message.attachments
         if attachment != []:
             attachment = message.attachments[0].proxy_url
+        else:
+            attachment = None
 
         # Sending to log channel
         try:
@@ -64,13 +66,15 @@ class Logging(commands.Cog):
                 send_channel = await guild.create_text_channel('modlog', category=cat)
 
             # Creating Embed
-            response = emb.gen_embed_orange("Deleted Message Log",
-                                            f"""Channel: {oc}
-                                            Author: {author}
-                                            Content:{content}
-                                            Attachments: {attachment}""")
+            e = emb.gen_embed_orange("Deleted Message Log", "")
+            e.add_field(name='Channel', value=oc, inline=True)
+            e.add_field(name='Author', value=author, inline=True)
+            e.add_field(name='Content', value=content, inline=False)
 
-            await send_channel.send(embed=response)
+            if attachment:
+                e.add_field(name='Attachments', value=attachment, inline=False)
+
+            await send_channel.send(embed=e)
 
         except Exception as e:
             print(e)
@@ -79,12 +83,15 @@ class Logging(commands.Cog):
     #                               On edit query
     @commands.Cog.listener(name="on_message_edit")
     async def on_message_edit(self, before, after):
+
         # Validation
         if before.author.bot:
             return
-        if after.edited_at is not None:
+        elif after.edited_at is not None:
             if (after.edited_at - before.created_at).total_seconds() < 60:
                 return
+        elif before.content == after.content:
+            return
 
         # Getting Variables
         author = before.author
@@ -95,6 +102,8 @@ class Logging(commands.Cog):
         attachment = after.attachments
         if attachment != []:
             attachment = after.attachments[0].proxy_url
+        else:
+            attachment = None
 
         # Logging to channel
         try:
@@ -105,15 +114,18 @@ class Logging(commands.Cog):
             send_channel = utils.get(guild.text_channels, name='modlog')
             if send_channel is None:
                 send_channel = await guild.create_text_channel('modlog', category=cat)
-            # Creating Embed
-            response = emb.gen_embed_orange("Edited Message Log",
-                                            f"""Channel: {oc}
-                                            Author: {author}
-                                            Before: {oldContent}
-                                            After: {newContent}
-                                            Attachments: {attachment}""")
 
-            await send_channel.send(embed=response)
+            # Creating Embed
+            e = emb.gen_embed_orange("Edited Message Log", "")
+            e.add_field(name='Channel', value=oc, inline=True)
+            e.add_field(name='Author', value=author, inline=True)
+            e.add_field(name='Before', value=oldContent, inline=False)
+            e.add_field(name='After', value=newContent, inline=False)
+
+            if attachment:
+                e.add_field(name='Attachments', value=attachment, inline=False)
+
+            await send_channel.send(embed=e)
         except Exception as e:
             print(e)
 
@@ -149,13 +161,15 @@ class Logging(commands.Cog):
             send_channel = utils.get(guild.text_channels, name='modlog')
             if send_channel is None:
                 send_channel = await guild.create_text_channel('modlog', category=cat)
+
             # Creating Embed
-            response = emb.gen_embed_orange(member,
-                                            f"""User Id: {id}
-                                            Old Nickname: {oldNick}
-                                            New Nickname: {newNick}""")
-            response.set_thumbnail(url=before.avatar_url)
-            await send_channel.send(embed=response)
+            e = emb.gen_embed_orange(member, "")
+            e.add_field(name='User ID', value=id, inline=True)
+            e.add_field(name='Old Nickname', value=oldNick, inline=False)
+            e.add_field(name='New Nickname', value=newNick, inline=False)
+            e.set_thumbnail(url=before.avatar_url)
+
+            await send_channel.send(embed=e)
         except Exception as e:
             print(e)
 
