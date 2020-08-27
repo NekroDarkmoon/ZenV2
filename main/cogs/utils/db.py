@@ -81,6 +81,7 @@ async def create_db(configs):
         await create_schemas(conn)
         log.info("Database connection established.")
     except Exception as e:
-        log.error(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
 
     return conn
