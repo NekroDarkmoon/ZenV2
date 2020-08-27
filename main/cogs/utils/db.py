@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------
 # Standard library imports
 import asyncpg
+import logging
 import sys
 import os
 
@@ -16,6 +17,9 @@ import os
 # Enabling local imports
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
+
+
+log = logging.getLogger(__name__)
 
 
 # --------------------------------------------------------------------------
@@ -75,7 +79,8 @@ async def create_db(configs):
     conn = await asyncpg.create_pool(database='Zen', user='Zen', password=configs['db_password'])
     try:
         await create_schemas(conn)
+        log.info("Database connection established.")
     except Exception as e:
-        print(e)
+        log.error(e)
 
     return conn

@@ -170,7 +170,7 @@ class Wildemount(commands.Cog):
         try:
             record = await self.bot.pool.fetchrow(sql, ctx.guild.id, quest_id)
         except Exception as e:
-            print(e)
+            log.error(e)
             await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
             return
 
@@ -192,7 +192,7 @@ class Wildemount(commands.Cog):
             response = emb.gen_embed_green('Looking for game', desc)
             await ctx.send(embed=response)
         except Exception as e:
-            print(e)
+            log.error(e)
             await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
             return
 
@@ -243,7 +243,7 @@ class Wildemount(commands.Cog):
                                        f'{channel.name} Deleted'), delete_after=5)
                         exit_query = True
                     except Exception as e:
-                        print(e)
+                        log.error(e)
                 else:
                     e = 'You already have an existing play channel. Unable to create more than one.'
                     e += '\nPinging a Crownsguard for help'
@@ -253,7 +253,7 @@ class Wildemount(commands.Cog):
                         exit_query = True
                         break
                     except Exception as e:
-                        print(e)
+                        log.error(e)
 
         if exit_query or delete_query:
             return
@@ -287,7 +287,7 @@ class Wildemount(commands.Cog):
             response = emb.gen_embed_green('Game Channel', 'Created respective channels.')
             await ctx.send(channel.mention, embed=response)
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                       Setting up channel restrictions

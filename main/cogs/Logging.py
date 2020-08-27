@@ -77,7 +77,7 @@ class Logging(commands.Cog):
             await send_channel.send(embed=e)
 
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                               On edit query
@@ -127,7 +127,7 @@ class Logging(commands.Cog):
 
             await send_channel.send(embed=e)
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                               On update query
@@ -171,7 +171,7 @@ class Logging(commands.Cog):
 
             await send_channel.send(embed=e)
         except Exception as e:
-            print(e)
+            log.error(e)
 
 
 def setup(bot):

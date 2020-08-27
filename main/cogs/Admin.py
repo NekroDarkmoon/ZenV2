@@ -50,7 +50,7 @@ class Admin(commands.Cog):
             await ctx.message.delete()
             await ctx.send(embed=e)
         except Exception as e:
-            print(e)
+            log.error(e)
             embed = emb.gen_embed_orange('Error', e)
             await ctx.send(embed=embed)
 
@@ -71,7 +71,7 @@ class Admin(commands.Cog):
             await ctx.message.delete()
             await ctx.send(embed=e)
         except Exception as e:
-            print(e)
+            log.error(e)
             embed = emb.gen_embed_orange('Error', e)
             await ctx.send(embed=embed)
 
@@ -92,7 +92,7 @@ class Admin(commands.Cog):
             await ctx.message.delete()
             await ctx.send(embed=e)
         except Exception as e:
-            print(e)
+            log.error(e)
             embed = emb.gen_embed_orange('Error', e)
             await ctx.send(embed=embed)
 
@@ -150,7 +150,7 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
 
         except Exception as e:
-            print(e)
+            log.error(e)
             await ctx.send(embed=emb.gen_embed_orange('Error', e))
 
 

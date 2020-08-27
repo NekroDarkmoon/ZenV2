@@ -64,7 +64,7 @@ async def leveling_up(channel, guild, conn, member, level, newexp):
         response = emb.gen_embed_cobalt("", string)
         await channel.send(embed=response, delete_after=10)
     except Exception as e:
-        print(e)
+        log.error(e)
 
     return int(level)
 
@@ -136,7 +136,7 @@ class Leveling(commands.Cog):
                 await conn.execute(sql, fetch[0]["msg_amt"]+1, newexp, time, guild.id, author.id)
 
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                             Give exp
@@ -201,7 +201,7 @@ class Leveling(commands.Cog):
                 await conn.execute(sql, newexp, ctx.message.created_at, ctx.guild.id, member.id)
 
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                             Check exp
@@ -259,7 +259,7 @@ Level {level+1} requires {nexp} exp: you need {missexp} more.\n\n"""
             await ctx.send(embed=e)
 
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                             Check exp
@@ -312,7 +312,7 @@ Level {level+1} requires {nexp} exp: you need {missexp} more."""
             await ctx.send(embed=e)
 
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                             Levels
@@ -367,7 +367,7 @@ Level {level+1} requires {nexp} exp: you need {missexp} more."""
             await ctx.send(embed=response)
 
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                             Role rewards
@@ -398,7 +398,7 @@ You can add roles using 'createrole Name Level (Colour)'.""")
             await ctx.send(embed=response)
 
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                          Create Role rewards
@@ -438,7 +438,7 @@ You can add roles using 'createrole Name Level (Colour)'.""")
             await ctx.send(embed=response)
 
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                             Delete Role rewards
@@ -465,7 +465,7 @@ You can add roles using 'createrole Name Level (Colour)'.""")
             await ctx.send(embed=response)
 
         except Exception as e:
-            print(e)
+            log.error(e)
 
 
 def setup(bot):

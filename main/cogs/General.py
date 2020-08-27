@@ -50,7 +50,7 @@ class General(commands.Cog):
         try:
             await ctx.send(github + '\n' + trello)
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                   Inator
