@@ -8,6 +8,7 @@ import asyncpg
 import logging
 import sys
 import os
+import traceback
 
 # Third party imports
 # import discord # noqa
