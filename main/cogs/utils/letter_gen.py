@@ -49,7 +49,8 @@ def add_signature(bg, msg, ctn):
         return (bg)
 
     except Exception as e:
-        log.error(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
         return
 
 
@@ -93,7 +94,8 @@ def add_content(bg, msg, ctn):
 
         return bg, (w, (place_h))
     except Exception as e:
-        log.error(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
         return
 
 
@@ -117,7 +119,8 @@ def add_title(bg, msg):
         return bg, (w, h)
 
     except Exception as e:
-        log.error(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
         return
 
 
@@ -130,7 +133,8 @@ def get_bg():
         bg = Image.open(f"{path}Scroll.png")
         return bg
     except Exception as e:
-        log.error(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
         return
 
 
@@ -159,7 +163,8 @@ def main(title, content, signature, skip=True):
         final_buffer.seek(0)
         return final_buffer
     except Exception as e:
-        log.error(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
         return
 
 

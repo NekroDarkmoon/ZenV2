@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 import re
+import traceback
 
 # Third party imports
 import discord # noqa
@@ -77,7 +78,8 @@ class Logging(commands.Cog):
             await send_channel.send(embed=e)
 
         except Exception as e:
-            log.error(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                               On edit query
@@ -127,7 +129,8 @@ class Logging(commands.Cog):
 
             await send_channel.send(embed=e)
         except Exception as e:
-            log.error(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                               On update query
@@ -171,7 +174,8 @@ class Logging(commands.Cog):
 
             await send_channel.send(embed=e)
         except Exception as e:
-            log.error(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
 
 
 def setup(bot):
