@@ -188,18 +188,20 @@ class Dnd(commands.Cog):
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                   Spellbook gen
     @commands.command(name='gspellbook')
-    async def gspellbook(self, ctx, wiz_level, spell_population):
+    async def gspellbook(self, ctx, *args):
+    # async def gspellbook(self, ctx, wiz_level, spell_population):
         """ Generates a spellbook for a wizard.
 
         Usage: gspellbook level[Optional] spell_population(Low/Mid/High)[Optional]"""
 
         # Get vars
         npc = npcgen.main(None, None)
+        wiz_level = 8
         spell_level = {1:1, 2:3, 3:5, 4:7, 5:9, 6:11, 7:13, 8:15, 9:17} # noqa Spell level: Wizard level
-        spell_population = spell_population.lower()
-        spell_slots = {1:2, 2:3, 3:9, 4:11, 5:13, 6:14, 7:15, 8:16, 9:18, 10:20,  # noqa
-                       11:21, 12:21, 13:22, 14:22, 15:23, 16:23, 17:24, 18:25, # noqa
+        spell_slots = {1:2, 2:3, 3:9, 4:11, 5:13, 6:14, 7:15, 8:16, 9:18, 10:20,
+                       11:21, 12:21, 13:22, 14:22, 15:23, 16:23, 17:24, 18:25,
                        19:26, 20:27} # noqa Wizard level: Slots
+        spell_population = 'Mid'  # spell_population.lower()
         if spell_population == 'Low':
             no_of_spells = random.randint(6, 12)
 
@@ -213,13 +215,14 @@ class Dnd(commands.Cog):
             no_of_spells = random.randint(6, 75)
 
         # Math
-
+        spell_fetch_data = []
+        max_slot = spell_level[wiz_level]
+        print(spell_fetch_data)
         # Import and Call module
 
         # Display
 
         # Cleanup
-        pass
 
 
 def setup(bot):
