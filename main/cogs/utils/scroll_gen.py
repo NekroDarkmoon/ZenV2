@@ -10,7 +10,7 @@ import pandas as pd
 from io import BytesIO
 
 import discord # noqa
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
@@ -36,8 +36,7 @@ def getSpell(spell):
             df['Name'] = df['Name'].str.lower()
             idx = df.index[df['Name'] == spell.lower().strip()].tolist()
             if s == []:
-                print("Please enter a valid spell name")
-                return
+                return None
             s = df.iloc[idx[0]]
 
         return(s)
@@ -50,9 +49,8 @@ def getSpell(spell):
 def getBg(school):
     # Get background
     try:
-        bg = Image.open(f"{path}images/parchment.png")
-        scroll = addCircle(bg, school)
-        return scroll
+        bg = Image.open(f"{path}images/{school}.png")
+        return bg
     except Exception as e:
         print(e)
         return
@@ -87,13 +85,13 @@ def addText(bg, spell):
 
 def addTitle(d, spell):
     try:
-        loc_w = 200
-        loc_h = 250
+        loc_w = 90
+        loc_h = 100
 
-        wrapper = textwrap.TextWrapper(width=15, replace_whitespace=False)
+        wrapper = textwrap.TextWrapper(width=20, replace_whitespace=False)
         name = wrapper.fill(text=str(spell[0]))
         print(spell[0])
-        fnt = ImageFont.truetype(f'{path}fonts/IokharicBold.ttf', 210)
+        fnt = ImageFont.truetype(f'{path}fonts/IokharicBold.ttf', 75)
         w, h = d.textsize(text=name, font=fnt)
 
         d.text((loc_w, loc_h), name, font=fnt, fill=(88, 73, 58))
@@ -105,8 +103,8 @@ def addTitle(d, spell):
 
 def addMeta(d, spell):
     try:
-        loc_w = 220
-        loc_h = 700
+        loc_w = 90
+        loc_h = 280
 
         level = "level " + str(spell[2])
         cast = str(spell[3])
@@ -116,7 +114,7 @@ def addMeta(d, spell):
         wrapper = textwrap.TextWrapper(width=13, replace_whitespace=False)
         line = wrapper.fill(text=f"{level}\n{cast}\n{duration}\n{range}")
 
-        fnt = ImageFont.truetype(f'{path}fonts/IokharicBold.ttf', 130)
+        fnt = ImageFont.truetype(f'{path}fonts/IokharicBold.ttf', 50)
         w, h = d.textsize(text=line, font=fnt)
         d.text((loc_w, loc_h), line, font=fnt, fill=(88, 73, 58))
     except Exception as e:
@@ -126,16 +124,16 @@ def addMeta(d, spell):
 
 def addDesc(d, spell):
     try:
-        loc_w = 220
-        loc_h = 1700
+        loc_w = 90
+        loc_h = 630
 
-        text = str(spell[9])
-        high = str(spell[10])
+        text = str(spell[9]) + "\n\n" + str(spell[10])
+        s = text[:900] if len(text) > 900 else text
+        print(s)
+        wrapper = textwrap.TextWrapper(width=60, drop_whitespace=False, replace_whitespace=False)
+        line = wrapper.fill(text=s)
 
-        wrapper = textwrap.TextWrapper(width=57, replace_whitespace=False)
-        line = wrapper.fill(text=f"{text}\n\n{high}")
-
-        fnt = ImageFont.truetype(f'{path}fonts/Iokharic.ttf', 85)
+        fnt = ImageFont.truetype(f'{path}fonts/Iokharic.ttf', 28)
         w, h = d.textsize(text=line, font=fnt)
         d.text((loc_w, loc_h), line, font=fnt, fill=(88, 73, 58))
     except Exception as e:
@@ -143,18 +141,30 @@ def addDesc(d, spell):
         return
 
 
+def resize(scroll):
+    basewidth = 900
+    wpercent = (basewidth/float(scroll.size[0]))
+    hsize = int((float(scroll.size[1])*float(wpercent)))
+    img = scroll.resize((basewidth, hsize), Image.ANTIALIAS)
+    return img
+
+
 def main(spellname=None):
-    spell = getSpell(spellname)
-
-    bg = getBg(str(spell[5]).strip())
-
-    scroll = addText(bg, spell)
+    try:
+        spell = getSpell(spellname)
+        if spell is None:
+            return
+        bg = getBg(str(spell[5]).strip())
+        scroll = addText(bg, spell)
 
     # scroll.save(f"{path}images/sc.png")
-    buffer = BytesIO()
-    scroll.save(buffer, format="PNG")
-    buffer.seek(0)
-    return buffer
+
+        buffer = BytesIO()
+        scroll.save(buffer, format="png")
+        buffer.seek(0)
+        return buffer
+    except Exception as e:
+        print(e)
 
 
 # -------------------------------------------------------------------------
