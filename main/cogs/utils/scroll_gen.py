@@ -128,14 +128,14 @@ def addDesc(d, spell):
         loc_h = 630
 
         text = str(spell[9]) + "\n\n" + str(spell[10])
-        s = text[:900] if len(text) > 900 else text
+        s = text[:850] if len(text) > 850 else text
         print(s)
-        wrapper = textwrap.TextWrapper(width=60, drop_whitespace=False, replace_whitespace=False)
+        wrapper = textwrap.TextWrapper(width=55, drop_whitespace=False, replace_whitespace=False)
         line = wrapper.fill(text=s)
 
-        fnt = ImageFont.truetype(f'{path}fonts/Iokharic.ttf', 28)
+        fnt = ImageFont.truetype(f'{path}fonts/IokharicBold.ttf', 28)
         w, h = d.textsize(text=line, font=fnt)
-        d.text((loc_w, loc_h), line, font=fnt, fill=(88, 73, 58))
+        d.text((loc_w, loc_h), line, font=fnt, fill=(26, 21, 17))
     except Exception as e:
         print(e)
         return
