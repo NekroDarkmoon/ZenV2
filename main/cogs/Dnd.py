@@ -182,6 +182,34 @@ class Dnd(commands.Cog):
 
         await ctx.send(file=file)
 
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                                   Scroll gen
+    @commands.command(name="gscroll")
+    async def gscroll(self, ctx, *args):
+        from utils import scroll_gen as scrollgen # noqa
+
+        spell = ""
+
+        if len(args) == 0:
+            spell = None
+        else:
+            for arg in args:
+                spell += arg + " "
+
+        try:
+            async with ctx.typing():
+                image = scrollgen.main(spell)
+                if image is None:
+                    response = emb.gen_embed_orange("Sorry", "Please recheck your spell(ing).")
+                    await ctx.send(embed=response)
+                    return
+                else:
+                    f = discord.File(filename="scroll.png", fp=image)
+
+            await ctx.send(file=f)
+        except Exception as e:
+            print(e)
+
 
 def setup(bot):
     bot.add_cog(Dnd(bot))
