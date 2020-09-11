@@ -8,11 +8,12 @@ import logging
 import os
 import sys
 import textwrap
+import traceback
 from io import BytesIO
 
 # Third party imports
 import discord # noqa
-from discord.ext import commands
+from discord.ext import commands # noqa
 from PIL import Image, ImageDraw, ImageFont
 
 # Local application imports
@@ -46,8 +47,10 @@ def add_signature(bg, msg, ctn):
         signature.multiline_text((place_w, place_h), msg, font=fnt, fill='black', align='right')
 
         return (bg)
+
     except Exception as e:
-        print(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
         return
 
 
@@ -91,7 +94,8 @@ def add_content(bg, msg, ctn):
 
         return bg, (w, (place_h))
     except Exception as e:
-        print(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
         return
 
 
@@ -115,7 +119,8 @@ def add_title(bg, msg):
         return bg, (w, h)
 
     except Exception as e:
-        print(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
         return
 
 
@@ -128,7 +133,8 @@ def get_bg():
         bg = Image.open(f"{path}Scroll.png")
         return bg
     except Exception as e:
-        print(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
         return
 
 
@@ -157,7 +163,8 @@ def main(title, content, signature, skip=True):
         final_buffer.seek(0)
         return final_buffer
     except Exception as e:
-        print(e)
+        log.warning(e)
+        log.error(traceback.format_exc())
         return
 
 

@@ -7,6 +7,7 @@
 import logging
 import sys
 import os
+import traceback
 
 # Third party imports
 import discord # noqa
@@ -44,7 +45,8 @@ class Owner(commands.Cog):
             response = emb.gen_embed_orange("System Alert", f"{extension} loaded")
             await ctx.send(embed=response)
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
             response = emb.gen_embed_orange("System Alert", f"{extension} failed to load")
             await ctx.send(embed=response)
 
@@ -58,7 +60,8 @@ class Owner(commands.Cog):
             response = emb.gen_embed_orange("System Alert", f"{extension} unloaded")
             await ctx.send(embed=response)
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
             response = emb.gen_embed_orange("System Alert", f"{extension} failed to load")
             await ctx.send(embed=response)
 
@@ -73,7 +76,8 @@ class Owner(commands.Cog):
             response = emb.gen_embed_orange("System Alert", f"{extension} reloaded")
             await ctx.send(embed=response)
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
             response = emb.gen_embed_orange("System Alert", f"{extension} failed to load")
             await ctx.send(embed=response)
 
@@ -86,7 +90,8 @@ class Owner(commands.Cog):
             for user in users:
                 print(user.name + ": " + str(user.id))
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                              Drop tables
@@ -118,7 +123,8 @@ class Owner(commands.Cog):
                 await ctx.send(embed=response)
 
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
 
 
 def setup(bot):

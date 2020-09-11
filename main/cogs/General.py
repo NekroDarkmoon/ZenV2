@@ -7,6 +7,7 @@
 import logging
 import random
 import sys
+import traceback
 import os
 
 # Third party imports
@@ -50,7 +51,7 @@ class General(commands.Cog):
         try:
             await ctx.send(github + '\n' + trello)
         except Exception as e:
-            print(e)
+            log.error(e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                   Inator

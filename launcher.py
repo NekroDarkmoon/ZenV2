@@ -5,9 +5,9 @@
 # --------------------------------------------------------------------------
 # Standard library imports
 import asyncio
-import asyncpg
+# import asyncpg
 import click
-import importlib
+# import importlib
 import contextlib
 import logging
 import json

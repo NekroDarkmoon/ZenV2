@@ -9,6 +9,7 @@ import datetime
 import logging
 import sys
 import os
+import traceback
 
 # Third party imports
 import discord # noqa
@@ -50,7 +51,8 @@ class Admin(commands.Cog):
             await ctx.message.delete()
             await ctx.send(embed=e)
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
             embed = emb.gen_embed_orange('Error', e)
             await ctx.send(embed=embed)
 
@@ -71,7 +73,8 @@ class Admin(commands.Cog):
             await ctx.message.delete()
             await ctx.send(embed=e)
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
             embed = emb.gen_embed_orange('Error', e)
             await ctx.send(embed=embed)
 
@@ -92,7 +95,8 @@ class Admin(commands.Cog):
             await ctx.message.delete()
             await ctx.send(embed=e)
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
             embed = emb.gen_embed_orange('Error', e)
             await ctx.send(embed=embed)
 
@@ -150,7 +154,8 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
 
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
             await ctx.send(embed=emb.gen_embed_orange('Error', e))
 
 
