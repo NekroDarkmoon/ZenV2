@@ -1,13 +1,18 @@
 # -------------------------------------------------------------------------
 #                              Imports
 # -------------------------------------------------------------------------
+import logging
 import random
 import sys
 import os
+import traceback
 
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
+
+
+log = logging.getLogger(__name__)
 
 
 # -------------------------------------------------------------------------
@@ -32,7 +37,8 @@ def get_name(sex):
 
                 fsex = (line[0:1])
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
             return
 
     ret_val = (line[3:-1])
