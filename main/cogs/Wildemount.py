@@ -8,6 +8,7 @@ import logging
 import random
 import sys
 import os
+import traceback
 
 # Third party imports
 import discord # noqa
@@ -170,7 +171,8 @@ class Wildemount(commands.Cog):
         try:
             record = await self.bot.pool.fetchrow(sql, ctx.guild.id, quest_id)
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
             await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
             return
 
@@ -192,7 +194,8 @@ class Wildemount(commands.Cog):
             response = emb.gen_embed_green('Looking for game', desc)
             await ctx.send(embed=response)
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
             await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
             return
 
@@ -243,7 +246,8 @@ class Wildemount(commands.Cog):
                                        f'{channel.name} Deleted'), delete_after=5)
                         exit_query = True
                     except Exception as e:
-                        print(e)
+                        log.warning(e)
+                        log.error(traceback.format_exc())
                 else:
                     e = 'You already have an existing play channel. Unable to create more than one.'
                     e += '\nPinging a Crownsguard for help'
@@ -253,7 +257,8 @@ class Wildemount(commands.Cog):
                         exit_query = True
                         break
                     except Exception as e:
-                        print(e)
+                        log.warning(e)
+                        log.error(traceback.format_exc())
 
         if exit_query or delete_query:
             return
@@ -287,7 +292,8 @@ class Wildemount(commands.Cog):
             response = emb.gen_embed_green('Game Channel', 'Created respective channels.')
             await ctx.send(channel.mention, embed=response)
         except Exception as e:
-            print(e)
+            log.warning(e)
+            log.error(traceback.format_exc())
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                       Setting up channel restrictions
@@ -305,7 +311,7 @@ class Wildemount(commands.Cog):
             return
 
         for role in roles:
-            if role.name == 'The Crownsguard' or role.name == 'Exceptions':
+            if role.name == 'Exceptions':
                 return
 
         response = emb.gen_embed_orange("Error",
@@ -324,15 +330,14 @@ class Wildemount(commands.Cog):
             content = message.content
             temp = "[entry]"
             if temp in content.lower():
-                await message.add_reaction('\<:upvote:741279182109147286>')
+                await message.add_reaction('\<:upvote:741279182109147286>') # noqa
 
                 # Get vars
                 author = message.author.name
-                created = message.created_at
                 with open('event.txt', 'a') as fp:
-                    msg = f"Author: {author} at {created}\n"
-                    msg += f"NPC: \n {content} \n"
-                    msg += "-------------------------------------------------------"
+                    msg = f"Author: {author}\n"
+                    msg += f"Hook: \n {content} \n"
+                    msg += "-------------------------------------------------------\n\n"
                     fp.write(msg)
 
             else:

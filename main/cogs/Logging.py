@@ -38,7 +38,7 @@ class Logging(commands.Cog):
     @commands.Cog.listener(name="on_message_delete")
     async def on_message_delete(self, message):
         # Validation
-        regex = "^[^\"\'\.\w]"
+        regex = "^[^\"\'\.\w]" # noqa
         if re.search(regex, message.content):
             return
         if message.author.bot:
