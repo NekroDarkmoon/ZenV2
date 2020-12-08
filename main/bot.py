@@ -127,15 +127,20 @@ class EmbedHelpCommand(commands.HelpCommand):
 # --------------------------------------------------------------------------
 class Zen(commands.Bot):
     def __init__(self):
+        allowed_mentions = discord.AllowedMentions(roles=False, everyone=False, users=True)
+        intents = discord.Intents(guilds=True, members=True, bans=True, emojis=True,
+                                  voice_states=True, messages=True, reactions=True)
+
         super().__init__(command_prefix=_prefix_callable, description=description, pm_help=None,
                          help_attrs=dict(hidden=True), fetch_offline_members=True,
-                         heartbeat_timeout=150.0, help_command=EmbedHelpCommand())
+                         heartbeat_timeout=150.0, help_command=EmbedHelpCommand(),
+                         allowed_mentions=allowed_mentions, intents=intents)
 
         # self.client_id = self.configs['client_id']
+        load_cogs(self)
 
     # On ready Function
     async def on_ready(self):
-        load_cogs(self)
 
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
