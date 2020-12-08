@@ -69,10 +69,6 @@ async def create_schemas(conn):
                                               quest_type text NOT NULL,
                                               msg TEXT);'''
 
-    # Alterations
-    sql = '''ALTER TABLE quest
-             ADD COLUMN posted_date DATE NOT NULL DEFAULT CURRENT_DATE;'''
-
     await conn.execute(sql)
     return
 
