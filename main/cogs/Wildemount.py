@@ -72,7 +72,7 @@ class Wildemount(commands.Cog):
             await self.bot.pool.execute(sql, server_id, post_id, author, post_type, msg)
             response = emb.gen_embed_green(
                                         f'Looking for game - {post_id} ',
-                                        f'Entry successfully created.\n\n{msg}')
+                                        f'Entry successfully created.\n\n**{author}**\n{msg}')
             await ctx.send(embed=response)
         except Exception as e:
             print("Failed to enter data", e)
@@ -111,7 +111,7 @@ class Wildemount(commands.Cog):
             try:
                 record = await self.bot.pool.fetchrow(sql, ctx.guild.id, quest_id)
             except Exception as e:
-                print("Failed to read data from sqlite table", e)
+                print("Failed to read data from Database", e)
                 await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
                 return
                 print(record)
@@ -120,18 +120,21 @@ class Wildemount(commands.Cog):
                     await ctx.send(embed=response)
                     return
 
-            entry = (f"{record[2]}: **{record[3]}** - {record[4]}")
-            response = emb.gen_embed_green(f"Quest ID: {record[1]}", f"{entry}")
-            await ctx.send(embed=response)
+            e = emb.gen_embed_green(f"Quest ID: {record[1]}", "")
+            e.add_field(name="Quest Giver", value=f"{record[2]}", inline=True)
+            e.add_field(name="Profession", value=f"{record[3]}", inline=True)
+            e.add_field(name="Quest", value=f"{record[4]}", inline=False)
+            e.add_field(name="Date posted", value=record[5], inline=False)
+            await ctx.send(embed=e)
             return
 
         if len(rows) > 10:
             e = emb.gen_embed_green('Quests Available',
-                                    "You can select view the following quests via `lfg quest_id`")
+                                    "You can select view the following quests via `&lfg quest_id`")
             for record in rows:
                 desc = record[4].replace("`", "").replace('\n', "")
-                desc = f"**{record[3]}** - {desc[:40]}..."
-                e.add_field(name=f'Quest ID: {record[1]}', value=desc, inline=False)
+                desc = f"{record[5]} - {desc[:40]}...\n"
+                e.add_field(name=f'Quest #{record[1]} by a {record[3]}', value=desc, inline=False)
 
                 if (len(e.fields)) > 20:
                     await ctx.send(embed=e)
@@ -141,9 +144,12 @@ class Wildemount(commands.Cog):
 
         else:
             for record in rows:
-                entry = f"{record[2]}: **{record[3]}** - {record[4]}"
-                response = emb.gen_embed_green(f"Quest ID: {record[1]}", f"{entry}")
-                await ctx.send(embed=response)
+                e = emb.gen_embed_green(f"Quest ID: {record[1]}", "")
+                e.add_field(name="Quest Giver", value=f"{record[2]}", inline=True)
+                e.add_field(name="Profession", value=f"{record[3]}", inline=True)
+                e.add_field(name="Quest", value=f"{record[4]}", inline=False)
+                e.add_field(name="Date posted", value=record[5], inline=False)
+                await ctx.send(embed=e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                          Deleting an lfg
