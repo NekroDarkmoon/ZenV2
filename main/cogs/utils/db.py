@@ -29,7 +29,6 @@ log = logging.getLogger(__name__)
 async def create_schemas(conn):
     # Add tables here
     # Table for server settings
-
     sql = """CREATE TABLE IF NOT EXISTS settings(server_id BIGINT NOT NULL,
                                                  prefix TEXT,
                                                  log_channel BIGINT,
@@ -64,10 +63,15 @@ async def create_schemas(conn):
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Custom tables for certain servers
     sql = '''CREATE TABLE IF NOT EXISTS quest(server_id BIGINT NOT NULL,
+                                              posted_date DATE NOT NULL DEFAULT CURRENT_DATE,
                                               quest_id BIGINT UNIQUE,
                                               author TEXT NOT NULL,
                                               quest_type text NOT NULL,
                                               msg TEXT);'''
+
+    # Alterations
+    sql = '''ALTER TABLE quest
+             ADD COLUMN posted_date DATE NOT NULL DEFAULT CURRENT_DATE;'''
 
     await conn.execute(sql)
     return
