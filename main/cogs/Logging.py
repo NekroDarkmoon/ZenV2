@@ -44,6 +44,8 @@ class Logging(commands.Cog):
             return
         if message.author.bot:
             return
+        if len(message.content) < 2:
+            return
 
         # Getting Variables
         author = message.author

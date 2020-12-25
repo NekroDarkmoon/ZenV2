@@ -3,6 +3,7 @@
 # -------------------------------------------------------------------------
 import logging
 import random
+import re
 import sys
 import os
 import traceback
@@ -31,7 +32,7 @@ def get_name(sex):
     while(sex[0] != fsex):
         gen_num = random.randint(1, 48530)
         try:
-            with open(f_names, 'r') as f:
+            with open(f_names, 'r', encoding='utf-8') as f:
                 # line = linecache.getline(f_names, gen_num)
                 line = f.readlines()[gen_num]
 
@@ -41,7 +42,7 @@ def get_name(sex):
             log.error(traceback.format_exc())
             return
 
-    ret_val = (line[3:-1])
+    ret_val = re.sub(r'[^\w]', '', (line[3:-1]))
     return ret_val
 
 
