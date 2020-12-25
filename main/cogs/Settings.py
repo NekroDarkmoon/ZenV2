@@ -93,38 +93,38 @@ class Owner(commands.Cog):
             log.warning(e)
             log.error(traceback.format_exc())
 
-    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    #                              Drop tables
-    @commands.command(name="drop")
-    async def drop(self, ctx, db: str):
-
-        conn = self.bot.pool
-
-        try:
-            if (db == "lb"):
-                await conn.execute("""DROP TABLE lb;""")
-                response = emb.gen_embed_red("Warning!", "Table lb deleted.")
-                await ctx.send(embed=response)
-
-            elif (db == "roles"):
-
-                fetchrole = await conn.fetch("""SELECT * FROM roles""")
-
-                print(fetchrole)
-                for fetched in fetchrole:
-                    await self.bot.get_guild(fetched["server_id"]).get_role(fetched["role_id"]).delete()
-
-                await conn.execute("""DROP TABLE roles;""")
-                response = emb.gen_embed_red("Warning!", "Table roles deleted.")
-                await ctx.send(embed=response)
-
-            else:
-                response = emb.gen_embed_red("Warning!", "That's not a table.")
-                await ctx.send(embed=response)
-
-        except Exception as e:
-            log.warning(e)
-            log.error(traceback.format_exc())
+    # # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # #                              Drop tables
+    # @commands.command(name="drop")
+    # async def drop(self, ctx, db: str):
+    #
+    #     conn = self.bot.pool
+    #
+    #     try:
+    #         if (db == "lb"):
+    #             await conn.execute("""DROP TABLE lb;""")
+    #             response = emb.gen_embed_red("Warning!", "Table lb deleted.")
+    #             await ctx.send(embed=response)
+    #
+    #         elif (db == "roles"):
+    #
+    #             fetchrole = await conn.fetch("""SELECT * FROM roles""")
+    #
+    #             print(fetchrole)
+    #             for fetched in fetchrole:
+    #                 await self.bot.get_guild(fetched["server_id"]).get_role(fetched["role_id"]).delete()
+    #
+    #             await conn.execute("""DROP TABLE roles;""")
+    #             response = emb.gen_embed_red("Warning!", "Table roles deleted.")
+    #             await ctx.send(embed=response)
+    #
+    #         else:
+    #             response = emb.gen_embed_red("Warning!", "That's not a table.")
+    #             await ctx.send(embed=response)
+    #
+    #     except Exception as e:
+    #         log.warning(e)
+    #         log.error(traceback.format_exc())
 
 
 def setup(bot):

@@ -31,16 +31,24 @@ class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="ping", pass_context=True, help="Replies with the latency to the bot.")
+    @commands.command(name="ping", pass_context=True)
     async def ping(self, ctx):
+        """Replies with the latency to the bot.
+
+        Usage: `ping`"""
+
         description = f'Pong! {round(self.bot.latency *1000)} ms'
         response = emb.gen_embed_green('Ping!', description)
         await ctx.send(embed=response)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                   Source code
-    @commands.command(name='source', help="Gets the bot's source code and trello page.")
+    @commands.command(name='source')
     async def source(self, ctx, *args):
+        """Gets the bot's source code and trello page.
+
+        Usage: `source -t[Optional]`"""
+
         trello = ''
         github = 'https://github.com/NekroDarkmoon/Zen-Public/'
 
@@ -57,7 +65,7 @@ class General(commands.Cog):
     #                                   Inator
     @commands.command(name='inator')
     async def inator(self, ctx, *, noun):
-        """ Create an inator! \nUsage: inator [word]"""
+        """ Create an inator! \n\nUsage: `inator word`"""
         number = random.randint(1000, 3000)
         response = "I’ve come up with the best plan to take over the Tri-State Area!!! "
         response += f"Behold the {noun}inator{number}"
@@ -68,7 +76,10 @@ class General(commands.Cog):
     #                               Invite Generator
     @commands.command(name="invite")
     async def invite(self, ctx):
-        """ Get an invite for your server """
+        """ Get an invite for your server
+
+        Usage: `invite`"""
+
         link = "https://discord.com/api/oauth2/authorize?client_id=607734719853101066&permissions=8&scope=bot"
         e = discord.Embed(
             title='Invite Link',

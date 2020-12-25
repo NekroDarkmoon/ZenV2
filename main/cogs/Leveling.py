@@ -29,41 +29,40 @@ log = logging.getLogger(__name__)
 # --------------------------------------------------------------------------
 #                           Level Up Functions
 # --------------------------------------------------------------------------
-# Level function -- So level up at 100, 250, 450...
+# Claculate level
 def level_up(level):
     basexp = 400
     inc = 200
     return int(basexp*level + inc*level*(level-1)/2)
 
 
-# Leveling function
-async def leveling_up(channel, guild, conn, member, level, newexp):
+# Leveling Function
+async def leveling_up(channel, guild, conn, member, level, newxp):
     leveling = True
     level += 1
     string = ""
 
     try:
         while leveling:
-            fetchrole = await conn.fetch("""SELECT * FROM roles WHERE
-                                         level = $1 AND server_id = $2;""",
-                                         level, guild.id)
+            sql = """SELECT * FROM roles WHERE level=$1 AND server_id=$2;"""
+            fetchrole = await conn.fetchrow(sql, level, guild.id)
 
-            if (fetchrole != []):
-                await member.add_roles(guild.get_role(fetchrole[0]["role_id"]))
-                string += member.name+" reached level "+str(level)+" and is now a "
-                string += fetchrole[0]["rolename"]+".\n"
+            if fetchrole is not None:
+                await member.add_roles(guild.get_role(fetchrole[2]))
+                string += f"{member.name} reached level {level} and is now a {fetchrole[0]}\n"
             else:
-                string = string + member.name+" reached level "+str(level)+".\n"
+                string += f"{member.name} reached level {level}. \n"
 
-            nexp = level_up(level)
-            if (newexp > nexp):
+            nxp = level_up(level)
+            if newxp > nxp:
                 level += 1
             else:
                 leveling = False
 
         string += "Congratulations!"
-        response = emb.gen_embed_cobalt("", string)
-        await channel.send(embed=response, delete_after=10)
+        e = emb.gen_embed_green("", string)
+        await channel.send(embed=e, delete_after=10)
+
     except Exception as e:
         log.warning(e)
         log.error(traceback.format_exc())
@@ -78,14 +77,13 @@ class Leveling(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-# Listener that checks every message and awards exp accordingly.
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                            XP Giver
     @commands.Cog.listener()
     async def on_message(self, message):
         regex = "^[^\"\'\.\w]" # noqa
 
-        if re.search(regex, message.content):
-            return
-        if message.author.bot:
+        if re.search(regex, message.content) or message.author.bot:
             return
 
         conn = self.bot.pool
@@ -94,226 +92,158 @@ class Leveling(commands.Cog):
         author = message.author
         time = message.created_at
 
+        # Try block
         try:
-            fetch = await conn.fetch("""SELECT * FROM lb WHERE server_id = $1 AND user_id = $2; """,
-                                     guild.id, author.id)
+            sql = """SELECT * FROM lb WHERE server_id = $1 AND user_id = $2; """
+            fetch = await conn.fetchrow(sql, guild.id, author.id)
 
-        # case 1: this is the first message by this member; an entry is created in the database.
-            if (fetch == []):
-                newexp = random.randint(15, 25)
-                await conn.execute("""INSERT INTO lb VALUES ( $1, $2, $3, $4, $5, $6 )""",
-                                   guild.id, author.id, time, 1, newexp, 1)
+            # Case 1: First message by user
+            if fetch is None:
+                newxp = random.randint(15, 25)
+                sql = """INSERT INTO lb VALUES ( $1, $2, $3, $4, $5, $6 )"""
+                await conn.execute(sql, guild.id, author.id, time, 1, newxp, 1)
 
-                string = "Welcome to this server, "+author.name+"!\n"+author.name+" is now level 1."
-                response = emb.gen_embed_cobalt("A new adventure is starting.", string)
-                await message.channel.send(embed=response)
+                string = f"Welcome to the server, {author.name}! \n{author.name} is now level 1."
+                e = emb.gen_embed_cobalt("A new adventure is starting.", string)
+                await message.channel.send(embed=e)
                 return
 
-        # case 2: less than one minute has passed since this member's last message: no exp is awarded
-            if((time - fetch[0]["last_exp"]).seconds < 60):
-                await conn.execute("""UPDATE lb SET msg_amt = $1 WHERE server_id = $2 AND user_id = $3""",
-                                   fetch[0]["msg_amt"]+1, guild.id, author.id)
+            # Case 2: Less than 1 min has elasped since last message.
+            if (time - fetch["last_exp"]).seconds < 60:
+                sql = """UPDATE lb SET msg_amt = $1 WHERE server_id = $2 AND user_id = $3"""
+                await conn.execute(sql, fetch[3]+1, guild.id, author.id)
                 return
 
-        # case 3: awarding new exp. Then,
-            newexp = fetch[0]["total_exp"] + random.randint(15, 25)
-            level = fetch[0]["level"]
+            # Case 3: Awarding new xp. Then,
+            newxp = fetch[4] + random.randint(15, 25)
+            level = fetch[5]
 
-        # if the awarded exp is enough to level up, call leveling_up
-            if (newexp >= level_up(level)):
-                newlevel = await leveling_up(message.channel, guild, conn, author, level, newexp)
+            # If leveled up call leveling Function
+            if newxp >= level_up(level):
+                newlevel = await leveling_up(message.channel, guild, conn, author, level, newxp)
                 sql = """UPDATE lb SET msg_amt = $1,
                                        total_exp = $2,
                                        last_exp = $3,
                                        level = $4 WHERE server_id = $5 AND user_id = $6"""
 
-                await conn.execute(sql, fetch[0]["msg_amt"]+1, newexp,
-                                   time, newlevel, guild.id, author.id)
+                await conn.execute(sql, fetch[3] + 1, newxp, time, newlevel, guild.id, author.id)
 
-        # otherwise, silently add the awarded exp to the database.
+            # Otherwise, silently add the awarded xp to the database
             else:
                 sql = """UPDATE lb SET msg_amt = $1,
                                        total_exp = $2,
                                        last_exp = $3 WHERE server_id = $4 AND user_id = $5"""
-                await conn.execute(sql, fetch[0]["msg_amt"]+1, newexp, time, guild.id, author.id)
+
+                await conn.execute(sql, fetch[3] + 1, newxp, time, guild.id, author.id)
 
         except Exception as e:
             log.warning(e)
             log.error(traceback.format_exc())
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    #                             Give exp
+    #                             Give xp
     @commands.command(name="givexp")
     @commands.has_permissions(administrator=True)
     async def givexp(self, ctx, member: discord.Member, exp: int):
-        """Gives another member xp"""
+        """Gives another member xp
+
+        Usage: `givexp "username"/@mention/id xp_amt`"""
+
         # Validation
-        if (exp < 0):
-            response = emb.gen_embed_red("Warning!", "You can't give negative exp.")
-            await ctx.send(embed=response)
+        if exp < 0:
+            e = emb.gen_embed_red("Warning!", "You can't give negative xp.")
+            await ctx.send(embed=e)
             return
 
-        if (exp == 0):
-            response = emb.gen_embed_cobalt("", member.name +
-                                            " was given 0 exp. Nothing to write home about...")
-            await ctx.send(embed=response)
+        if exp == 0:
+            e = emb.gen_embed_cobalt("Eh?",
+                                     f"{member.name} was given 0 xp. Nothing to write home about...")
+            await ctx.send(embed=e)
             return
 
+        # Set connection
         conn = self.bot.pool
 
         try:
-            fetch = await conn.fetch("""SELECT * FROM lb WHERE server_id = $1 AND user_id = $2; """,
-                                     ctx.guild.id, member.id)
+            sql = """SELECT * FROM lb WHERE server_id=$1 AND user_id=$2;"""
+            fetch = await conn.fetchrow(sql, ctx.guild.id, member.id)
 
-            # Check if the member has an entry in the database; otherwise, a new entry is created.
-            if (fetch == []):
-                await conn.execute("""INSERT INTO lb VALUES ( $1, $2, $3, $4, $5, $6 )""",
-                                   ctx.guild.id, member.id, ctx.message.created_at, 1, 0, 0)
+            #  If no previous entry
+            if fetch is None:
+                sql = """INSERT INTO lb VALUES ($1, $2, $3, $4, $5, $6)"""
+                await conn.execute(sql, ctx.guild.id, member.id, ctx.message.created_at, 1, 0, 0)
+                string = f"Welcome to this server, {member.name}!\n{member.name} is now level 1."
 
-                string = "Welcome to this server, "+member.name+"!\n"+member.name+" is now level 1."
+                e = emb.gen_embed_green("A new adventure is starting", string)
+                await ctx.send(embed=e)
 
-                response = emb.gen_embed_cobalt("A new adventure is starting.", string)
-                await ctx.send(embed=response)
-
-                newexp = exp
+                newxp = exp
                 level = 1
 
             else:
-                # Send a message to verify that exp has been awarded.
-                string = member.name+" was given "+str(exp)+" exp!"
-                response = emb.gen_embed_cobalt("", string)
-                await ctx.send(embed=response)
+                string = f"{member.name} was given {exp} exp!"
+                e = emb.gen_embed_green("", string)
+                await ctx.send(embed=e)
 
-                newexp = fetch[0]["total_exp"] + exp
-                level = fetch[0]["level"]
+                newxp = fetch[4] + exp
+                level = fetch[5]
 
-            # If the awarded exp is enough to level up, call leveling_up
-            if (newexp >= level_up(level)):
-                newlevel = await leveling_up(ctx.channel, ctx.guild, conn, member, level, newexp)
+            # If threshold reached next level
+            if newxp >= level_up(level):
+                newlevel = await leveling_up(ctx.channel, ctx.guild, conn, member, level, newxp)
                 sql = """UPDATE lb SET total_exp = $1,
                                        last_exp = $2,
                                        level = $3 WHERE server_id = $4 AND user_id = $5"""
 
-                await conn.execute(sql, newexp, ctx.message.created_at, newlevel,
-                                   ctx.guild.id, member.id)
+                await conn.execute(sql, newxp, ctx.message.created_at, newlevel, ctx.guild.id, member.id)
 
-        # otherwise, silently add the awarded exp to the database.
             else:
                 sql = """UPDATE lb SET total_exp = $1,
                                        last_exp = $2 WHERE server_id = $3 AND user_id = $4"""
-                await conn.execute(sql, newexp, ctx.message.created_at, ctx.guild.id, member.id)
+
+                await conn.execute(sql, newxp, ctx.message.created_at, ctx.guild.id, member.id)
 
         except Exception as e:
             log.warning(e)
             log.error(traceback.format_exc())
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    #                             Check exp
+    #                             Check xp
     @commands.command(name="rank")
-    async def rank(self, ctx):
-        """Gets your current status on the server"""
+    async def rank(self, ctx, member: discord.Member = None):
+        """Gets rank on the server
+
+        Usage: `rank id[Optional]`"""
+
         conn = self.bot.pool
 
-        try:
-            fetch = await conn.fetch("""SELECT * FROM lb WHERE user_id = $1; """, ctx.author.id)
-
-            # Validation
-            if (fetch == []):
-                response = emb.gen_embed_green("", "Sorry, who?")
-                await ctx.send(embed=response)
-                return
-
-            exp = 0
-            texp = 0
-            here = False
-
-            for fetched in fetch:
-                texp += fetched["total_exp"]
-                if(fetched["server_id"] == ctx.guild.id):
-                    here = True
-                    here_fetch = fetched
-
-            if here is True:
-                exp = here_fetch["total_exp"]
-                level = here_fetch["level"]
-                nexp = level_up(level)
-                missexp = nexp - exp
-
-                string = f"""You have {texp} exp overall.
-
-You are level {level} on this server, with {exp} exp.
-You last gained exp {(ctx.message.created_at - here_fetch["last_exp"]).seconds} seconds ago.
-
-Level {level+1} requires {nexp} exp: you need {missexp} more.\n\n"""
-
-            else:
-                string = f"Your adventure on this server hasn't started yet, but you have {texp} exp somewhere else.\n"
-
-            # Validation
-            if 'nexp' not in locals():
-                response = emb.gen_embed_green("", "Sorry, who?")
-                await ctx.send(embed=response)
-                return
-
-            e = emb.gen_embed_cobalt(f"{ctx.author}", string)
-            e.set_thumbnail(url=ctx.author.avatar_url)
-            e.add_field(name="XP", value=f"{exp}/{nexp}", inline=True)
-            e.add_field(name="Level", value=level, inline=True)
-            e.add_field(name="Messages", value=here_fetch["msg_amt"], inline=True)
-            await ctx.send(embed=e)
-
-        except Exception as e:
-            log.warning(e)
-            log.error(traceback.format_exc())
-
-    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    #                             Check exp
-    @commands.command(name="theirxp")
-    @commands.has_permissions(manage_guild=True)
-    async def theirxp(self, ctx, member: discord.Member):
-        """Gets the exp for another member on the server"""
-        conn = self.bot.pool
+        # Verification
+        if member is None:
+            member = ctx.author
 
         try:
-            fetch = await conn.fetch("""SELECT * FROM lb WHERE user_id = $1; """, member.id)
+            sql = """SELECT * FROM lb WHERE server_id=$1 AND user_id=$2"""
+            fetch = await conn.fetchrow(sql, ctx.guild.id, member.id)
 
-            if (fetch == []):
-                response = emb.gen_embed_red("Warning!",
-                                             "This adventurer doesn't have any exp anywhere.")
-                await ctx.send(embed=response)
+            if fetch is None:
+                e = emb.gen_embed_red("", "This adventurer doesn't have any xp on this server.")
+                await ctx.send(embed=e)
                 return
 
-            exp = 0
-            texp = 0
-            here = False
+            xp = fetch[4]
+            level = fetch[5]
+            nxp = level_up(level)
+            missxp = nxp - xp
 
-            for fetched in fetch:
-                texp += fetched["total_exp"]
-                if(fetched["server_id"] == ctx.guild.id):
-                    here = True
-                    here_fetch = fetched
-
-            if here is True:
-                exp = here_fetch["total_exp"]
-                level = here_fetch["level"]
-                nexp = level_up(level)
-                missexp = nexp - exp
-
-                string = f"""You have {texp} exp overall.
-
-You are level {level} on this server, with {exp} exp. You last gained exp
-{(ctx.message.created_at - here_fetch["last_exp"] ).seconds} seconds ago.
-
-Level {level+1} requires {nexp} exp: you need {missexp} more."""
-
-            else:
-                string = f"{member.name}'s adventure on this server hasn't started yet, but they have {texp} exp somewhere else.\n"
+            string = f"You are level {level} on this server, with {xp} xp.\n"
+            string += f"You last gained xp {(ctx.message.created_at - fetch[2]).seconds} seconds ago."
+            string += f"\n\n Level {level+1} requires {nxp} xp: You need {missxp} more."
 
             e = emb.gen_embed_cobalt(f"{member}", string)
             e.set_thumbnail(url=member.avatar_url)
-            e.add_field(name="XP", value=f"{exp}/{nexp}", inline=True)
+            e.add_field(name="XP", value=f"{xp}/{nxp}", inline=True)
             e.add_field(name="Level", value=level, inline=True)
-            e.add_field(name="Messages", value=here_fetch["msg_amt"], inline=True)
+            e.add_field(name="Messages", value=fetch[3], inline=True)
             await ctx.send(embed=e)
 
         except Exception as e:
@@ -324,7 +254,9 @@ Level {level+1} requires {nexp} exp: you need {missexp} more."""
     #                             Levels
     @commands.command(name="levels")
     async def levels(self, ctx, max: int = 10):
-        """Lists the exp required for levels"""
+        """Lists the xp required for levels
+
+        Usage: `levels level`"""
         string = ""
 
         if max < 3:
@@ -334,53 +266,69 @@ Level {level+1} requires {nexp} exp: you need {missexp} more."""
         max = max + 3
 
         for i in range(min, max):
-            string += f"To level {i+1}: {level_up(i)} exp\n"
+            string += f"To level {i+1}: {level_up(i)} xp\n"
 
-        response = emb.gen_embed_cobalt("Exp requirements by level", string)
-        await ctx.send(embed=response)
+        e = emb.gen_embed_cobalt("XP requirements by level", string)
+        await ctx.send(embed=e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                             Ranking
     @commands.command(name="ranking")
-    async def ranking(self, ctx, max: int = 10):
-        """Lists top 15 ranking on the server"""
+    async def ranking(self, ctx, max: int = 15):
+        """Lists top 15 ranked adventurers on the server
+
+        Usage: `rank`"""
+
         conn = self.bot.pool
 
         try:
-            sql = """SELECT * FROM lb WHERE server_id = $1 ORDER BY total_exp DESC;"""
+            sql = """SELECT * FROM lb WHERE server_id=$1 ORDER BY total_exp DESC;"""
             fetch = await conn.fetch(sql, ctx.guild.id)
-
-            if (fetch == []):
-                response = emb.gen_embed_red("Warning!", "There are no adventurers in this server.")
-                await ctx.send(embed=response)
-                return
-
-            rank = 0
-
-            table = []
-
-            for fetched in fetch:
-                rank = rank + 1
-                line = [rank, ctx.guild.get_member(fetched["user_id"]).name, fetched["level"]]
-                table.append(line)
-                if rank > 15:
-                    break
-
-            headers = ["Rank", "Name", "Level"]
-            content = tabulate.tabulate(table, headers, tablefmt="simple", stralign="left",
-                                        numalign="center")
-            response = emb.gen_embed_cobalt("Ranking", "```"+content+"```")
-            await ctx.send(embed=response)
-
         except Exception as e:
-            log.warning(e)
-            log.error(traceback.format_exc())
+            print(e)
+
+        if fetch == []:
+            e = emb.gen_embed_red("Warning!", "There are no adventurers in this guild.")
+            await ctx.send(embed=e)
+            return
+
+        rank = 1
+        table = []
+
+        for fetched in fetch:
+            try:
+                line = [rank, ctx.guild.get_member(fetched["user_id"]).name, fetched["level"]]
+            except Exception:
+                sql = """DELETE FROM lb WHERE server_id=$1 and user_id=$2;"""
+                await conn.execute(sql, ctx.guild.id, fetched["user_id"])
+                log.warning(f"Deleted {fetched['user_id']} from db")
+                continue
+
+            table.append(line)
+            if rank > max:
+                break
+            else:
+                rank += 1
+
+        headers = ["Rank", "Name", "Level"]
+        content = tabulate.tabulate(table, headers, tablefmt="simple", stralign="left",
+                                    numalign="center")
+
+        if len(content) > 2000:
+            await ctx.send("Too many entries. Fix coming soon-ish.")
+
+        else:
+            e = emb.gen_embed_cobalt("Ranking", f"```{content}```")
+            await ctx.send(embed=e)
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                             Role rewards
     @commands.command(name="rewards")
     async def rewards(self, ctx, *args):
-        """Fetches all the possible rewards for levels"""
+        """Fetches all the possible rewards for levels
+
+        Usage: `rewards`"""
+
         conn = self.bot.pool
 
         try:
@@ -397,6 +345,7 @@ You can add roles using 'createrole Name Level (Colour)'.""")
             for fetched in fetch:
                 line = [fetched["rolename"], fetched["level"]]
                 table.append(line)
+
             headers = ["Role", "Level"]
             content = tabulate.tabulate(table, headers, tablefmt="simple", stralign="left",
                                         numalign="right")
@@ -414,7 +363,10 @@ You can add roles using 'createrole Name Level (Colour)'.""")
     @commands.has_permissions(manage_guild=True)
     async def createrr(self, ctx, rolename: str, level: int,
                        colour: discord.Colour = discord.Colour.default()):
-        """Creates a reward role"""
+        """Creates a reward role
+
+        Usage: `createrr rolename level colour`"""
+
         conn = self.bot.pool
         try:
             # checking if the role already exists, or if there is another role at that level
@@ -454,7 +406,10 @@ You can add roles using 'createrole Name Level (Colour)'.""")
     @commands.command(name="deleterr")
     @commands.has_permissions(manage_guild=True)
     async def deleterr(self, ctx, rolename: str):
-        """Deletes a reward role"""
+        """Deletes a reward role
+
+        Usage: deleterr rolename"""
+
         conn = self.bot.pool
 
         try:
@@ -478,14 +433,8 @@ You can add roles using 'createrole Name Level (Colour)'.""")
             log.error(traceback.format_exc())
 
 
+# --------------------------------------------------------------------------
+#                                 Main
+# --------------------------------------------------------------------------
 def setup(bot):
     bot.add_cog(Leveling(bot))
-
-
-# SQL queries
-
-# SELECT * FROM lb
-# SELECT total_exp, level FROM lb (returns all records, showing the requested entries)
-# SELECT * FROM lb WHERE total_exp > 100 AND level < 2;
-# INSERT INTO lb VALUES (server_id, user_id, msg_amt, total_exp, level)
-#

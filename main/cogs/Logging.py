@@ -66,16 +66,22 @@ class Logging(commands.Cog):
             if send_channel is None:
                 send_channel = await guild.create_text_channel('modlog', category=cat)
 
+            limit = 1024
+            content = [str[i:i+limit] for i in range(0, len(content), limit)]
+
             # Creating Embed
             e = emb.gen_embed_orange("Deleted Message Log", "")
-            e.add_field(name='Channel', value=oc, inline=True)
-            e.add_field(name='Author', value=author, inline=True)
-            e.add_field(name='Content', value=content, inline=False)
 
-            if attachment:
-                e.add_field(name='Attachments', value=attachment, inline=False)
+            for chunk in content:
+                e.add_field(name='Channel', value=oc, inline=True)
+                e.add_field(name='Author', value=author, inline=True)
+                e.add_field(name='Content', value=chunk, inline=False)
 
-            await send_channel.send(embed=e)
+                if attachment:
+                    e.add_field(name='Attachments', value=attachment, inline=False)
+
+                await send_channel.send(embed=e)
+                e.clear_fields()
 
         except Exception as e:
             log.warning(e)
@@ -117,17 +123,26 @@ class Logging(commands.Cog):
             if send_channel is None:
                 send_channel = await guild.create_text_channel('modlog', category=cat)
 
+            limit = 1024
+            oldContent = [str[i:i+limit] for i in range(0, len(oldContent), limit)]
+            newContent = [str[i:i+limit] for i in range(0, len(newContent), limit)]
+
             # Creating Embed
             e = emb.gen_embed_orange("Edited Message Log", "")
-            e.add_field(name='Channel', value=oc, inline=True)
-            e.add_field(name='Author', value=author, inline=True)
-            e.add_field(name='Before', value=oldContent, inline=False)
-            e.add_field(name='After', value=newContent, inline=False)
 
-            if attachment:
-                e.add_field(name='Attachments', value=attachment, inline=False)
+            for elem, chunk in enumerate(oldContent):
+                e.add_field(name='Channel', value=oc, inline=True)
+                e.add_field(name='Author', value=author, inline=True)
 
-            await send_channel.send(embed=e)
+                if attachment:
+                    e.add_field(name='Attachments', value=attachment, inline=False)
+
+                e.add_field(name='Before', value=chunk, inline=False)
+                e.add_field(name='After', value=newContent[elem], inline=False)
+
+                await send_channel.send(embed=e)
+                e.clear_fields()
+
         except Exception as e:
             log.warning(e)
             log.error(traceback.format_exc())

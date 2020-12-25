@@ -34,11 +34,13 @@ class Admin(commands.Cog):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                   Kick
-    @commands.command(name="kick", pass_context=True, help="Kicks a user from the server")
+    @commands.command(name="kick", pass_context=True)
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason=None):
-        """Kicks a member from the server."""
+        """Kicks a member from the server.
+
+        `kick 'username'/@mention/id reason`"""
 
         if reason is None:
             reason = f"Kicked by {ctx.author}\nID: {ctx.author.id}"
@@ -58,11 +60,14 @@ class Admin(commands.Cog):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                   Ban
-    @commands.command(name="ban", pass_context=True, help="Bans the user from the server")
+    @commands.command(name="ban", pass_context=True)
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
-        """Bans a member from the server."""
+        """Bans a member from the server.
+
+        `ban 'username'/@mention/id reason`"""
+
         if reason is None:
             reason = f"Banned by {ctx.author}\nID: {ctx.author.id}"
 
@@ -80,11 +85,14 @@ class Admin(commands.Cog):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                   Unban
-    @commands.command(name="unban", pass_context=True, help="Unbans the user from the server")
+    @commands.command(name="unban", pass_context=True)
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.Member, *, reason=None):
-        """Unbans a member from the server"""
+        """Unbans a member from the server
+
+        `unban 'username'/@mention/id reason`"""
+
         if reason is None:
             reason = f"Unbanned by {ctx.author}.\nID: {ctx.author.id}"
 
@@ -106,7 +114,10 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     async def userinfo(self, ctx, *, member: discord.Member):
-        """Displays information about a user"""
+        """Displays information about a user
+
+        `userinfo 'username'/@mention/id`"""
+
         try:
             # Variables
             conn = self.bot.pool

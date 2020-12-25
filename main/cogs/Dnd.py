@@ -35,9 +35,11 @@ class Dnd(commands.Cog):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                       Npc Gen
-    @commands.command(name="gnpc", pass_context=True, help="Generating a random npc.",
-                      usage="m/f/t[Optional], race[Optional]")
+    @commands.command(name="gnpc", pass_context=True)
     async def gnpc(self, ctx, *args):
+        """Generate a random npc
+
+        `gnpc m/f/t[Optional] race[Optional]`"""
         sex = None
         race = None
 
@@ -52,8 +54,11 @@ class Dnd(commands.Cog):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                   Weather Gen
-    @commands.command(name='weather', help="Generates the weather for the world")
+    @commands.command(name='weather')
     async def weather(self, ctx):
+        """Generate a random npc
+
+        `weather`"""
         # Create embed
         e = emb.gen_embed_cobalt('Weather Generator', None)
 
@@ -192,7 +197,7 @@ class Dnd(commands.Cog):
     # async def gspellbook(self, ctx, wiz_level, spell_population):
         """ Generates a spellbook for a wizard.
 
-        Usage: gspellbook level[Optional] spell_population(Low/Mid/High)[Optional]"""
+        Usage: `gspellbook level[Optional] spell_population(Low/Mid/High)[Optional]`"""
 
         # Get vars
         npc = npcgen.main(None, None)

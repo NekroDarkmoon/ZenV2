@@ -38,9 +38,11 @@ class Wildemount(commands.Cog):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                          Creating an lfg
-    @commands.command(name="clfg", help="Create a post for a game.",
-                      usage="d/p Description")
+    @commands.command(name="clfg")
     async def clfg(self, ctx, post_type, *, msg):
+        """Create a post for a game.
+
+        Usage: `clfg d/p Description`"""
         await ctx.message.delete()
 
         # validation
@@ -80,8 +82,12 @@ class Wildemount(commands.Cog):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                          Looking up an lfg
-    @commands.command(name="lfg", help="List all lfg quests", usage="d/p Description")
+    @commands.command(name="lfg")
     async def lfg(self, ctx, quest_id=None):
+        """List all lfg quests.
+
+        Usage: `lfg questid[optionl]`"""
+
         await ctx.message.delete()
 
         sql = """SELECT * FROM quest WHERE server_id=$1"""
@@ -153,8 +159,12 @@ class Wildemount(commands.Cog):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                          Deleting an lfg
-    @commands.command(name="dlfg", help="Delete a posted quest", usage="QuestID")
+    @commands.command(name="dlfg")
     async def dlfg(self, ctx, quest_id=None):
+        """Delete a posted quest
+
+        Usage: `dlfg questid`"""
+
         await ctx.message.delete()
 
         # Get vars
@@ -209,6 +219,14 @@ class Wildemount(commands.Cog):
     #                                   CPC
     @commands.command(name="playchn", help="List all lfg quests")
     async def playchn(self, ctx, *args):
+        """Creates a channel for you and your friends to use.
+
+        Usage: To create - `playchn @user1 @user2 ... @user9`
+               To delete - `playchn -d`
+
+        **Note:** You can only have one channel.
+        **Note:** Max limit is 9. When mentioning you don't need to mention yourself."""
+
         await ctx.message.delete()
         # Get vars
         server = ctx.guild
