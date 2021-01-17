@@ -68,19 +68,21 @@ class Logging(commands.Cog):
             if send_channel is None:
                 send_channel = await guild.create_text_channel('modlog', category=cat)
 
+            print(content)
             limit = 1024
-            content = [str[i:i+limit] for i in range(0, len(content), limit)]
+            content = [content[i:i+limit] for i in range(0, len(content), limit)]
+            print(content)
 
             # Creating Embed
             e = emb.gen_embed_orange("Deleted Message Log", "")
+            if attachment:
+                e.add_field(name='Attachments', value=attachment, inline=False)
 
             for chunk in content:
+                print(chunk)
                 e.add_field(name='Channel', value=oc, inline=True)
                 e.add_field(name='Author', value=author, inline=True)
                 e.add_field(name='Content', value=chunk, inline=False)
-
-                if attachment:
-                    e.add_field(name='Attachments', value=attachment, inline=False)
 
                 await send_channel.send(embed=e)
                 e.clear_fields()
@@ -126,19 +128,17 @@ class Logging(commands.Cog):
                 send_channel = await guild.create_text_channel('modlog', category=cat)
 
             limit = 1024
-            oldContent = [str[i:i+limit] for i in range(0, len(oldContent), limit)]
-            newContent = [str[i:i+limit] for i in range(0, len(newContent), limit)]
+            oldContent = [oldContent[i:i+limit] for i in range(0, len(oldContent), limit)]
+            newContent = [newContent[i:i+limit] for i in range(0, len(newContent), limit)]
 
             # Creating Embed
             e = emb.gen_embed_orange("Edited Message Log", "")
+            if attachment:
+                e.add_field(name='Attachments', value=attachment, inline=False)
 
             for elem, chunk in enumerate(oldContent):
                 e.add_field(name='Channel', value=oc, inline=True)
                 e.add_field(name='Author', value=author, inline=True)
-
-                if attachment:
-                    e.add_field(name='Attachments', value=attachment, inline=False)
-
                 e.add_field(name='Before', value=chunk, inline=False)
                 e.add_field(name='After', value=newContent[elem], inline=False)
 
