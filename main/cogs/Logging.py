@@ -67,19 +67,15 @@ class Logging(commands.Cog):
             send_channel = utils.get(guild.text_channels, name='modlog')
             if send_channel is None:
                 send_channel = await guild.create_text_channel('modlog', category=cat)
-
-            print(content)
             limit = 1024
             content = [content[i:i+limit] for i in range(0, len(content), limit)]
-            print(content)
-
+            
             # Creating Embed
             e = emb.gen_embed_orange("Deleted Message Log", "")
             if attachment:
                 e.add_field(name='Attachments', value=attachment, inline=False)
 
             for chunk in content:
-                print(chunk)
                 e.add_field(name='Channel', value=oc, inline=True)
                 e.add_field(name='Author', value=author, inline=True)
                 e.add_field(name='Content', value=chunk, inline=False)
