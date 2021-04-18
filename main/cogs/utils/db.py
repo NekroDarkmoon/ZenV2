@@ -51,6 +51,15 @@ async def create_schemas(conn):
 
     await conn.execute(sql)
 
+    # Table for Reputation system
+    sql = """CREATE TABLE IF NOT EXISTS 
+             rep(server_id BIGINT NOT NULL,
+                 user_id BIGINT NOT NULL,
+                 rep BIGINT NOT NULL DEFAULT 0,
+                 CONSTRAINT server_user UNIQUE (server_id, user_id));"""
+    await conn.execute(sql)
+    
+
     # Table for roles (for the leveling system)
     sql = """CREATE TABLE IF NOT EXISTS roles(rolename TEXT NOT NULL,
                                               server_id BIGINT NOT NULL,
