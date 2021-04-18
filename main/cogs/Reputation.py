@@ -62,7 +62,11 @@ class Reputation(commands.Cog):
             await ctx.send(embed=e, delete_after=5)
             return
         
-        if ctx.author.id == member.id:
+        if member.bot:
+            await ctx.send("`Can't give rep to a bot.`")
+            return
+        
+        if not is_admin and (ctx.author.id == member.id):
             e = emb.gen_embed_red("Hunh",
                                   "Sneakily trying to give yourself xp eh.")
             await ctx.send(embed=e, delete_after=5)
@@ -70,12 +74,12 @@ class Reputation(commands.Cog):
         
         for elem, user in enumerate(self.cooldown):
             curr_time = time.time()
-            if user[0] == author.id and (curr_time - user[1]) < 60:
+            if user[0] == author.id and (curr_time - user[1]) < 120:
                 e = emb.gen_embed_red("Cooldown",
                                        f"Currently in cooldown.")
                 await ctx.send(embed=e, delete_after=5)
                 return
-            elif user[0] == author.id and (curr_time - user[1] > 60):
+            elif user[0] == author.id and (curr_time - user[1] > 120):
                 print("Removing from cooldown")
                 self.cooldown.pop(elem)
             else:
@@ -135,6 +139,35 @@ class Reputation(commands.Cog):
 
         message = f"Member {member.name} has `{rep}` rep."
         await ctx.send(message)
+
+
+    #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                          Set Rep
+    @commands.command(name="setrep")
+    @commands.has_permissions(administrator=True)
+    async def setrep(self, ctx, member: discord.Member, rep: int):
+        """ Set rep for a particular member
+        
+        Usage: `setrep "username/@mention/id rep"`
+        """
+
+        # Variables
+        conn = self.bot.pool
+
+        try:
+            sql = """INSERT INTO rep (server_id, user_id, rep)
+                    VALUES ($1, $2, $3)
+                    ON CONFLICT ON CONSTRAINT server_user 
+                    DO UPDATE SET rep = $3;"""
+            
+            await conn.execute(sql, ctx.guild.id, member.id, rep)
+            e = emb.gen_embed_green("Rep",
+                                    f"Set {member.name}'s rep to {rep}.")
+            
+            await ctx.send(embed=e, delete_after=5)
+        except Exception as e:
+            log.error(traceback.format_exc())
+
 
 
     #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
