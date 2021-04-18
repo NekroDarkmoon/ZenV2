@@ -208,7 +208,7 @@ class Reputation(commands.Cog):
 
         for elem, fetched in enumerate(fetch):
             
-            elem = elem + (page-1) + 1
+            elem = elem + 15*(page-1) + 1
 
             try:
                 line = [elem, ctx.guild.get_member(fetched["user_id"]).name, fetched["rep"]]
