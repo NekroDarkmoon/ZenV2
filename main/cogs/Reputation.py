@@ -205,13 +205,12 @@ class Reputation(commands.Cog):
             return
     
         fetch = fetch[15*(page-1):]
+        rank = 15*(page-1) + 1 
 
         for elem, fetched in enumerate(fetch):
             
-            elem = elem + 15*(page-1) + 1
-
             try:
-                line = [elem, ctx.guild.get_member(fetched["user_id"]).name, fetched["rep"]]
+                line = [rank, ctx.guild.get_member(fetched["user_id"]).name, fetched["rep"]]
             except Exception:
                 sql = """DELETE FROM rep WHERE server_id=$1 and user_id=$2;"""
                 await conn.execute(sql, ctx.guild.id, fetched["user_id"])
@@ -219,6 +218,7 @@ class Reputation(commands.Cog):
                 continue
 
             table.append(line)
+            rank += 1
             if elem > 14:
                 break
         
