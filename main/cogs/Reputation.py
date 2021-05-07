@@ -266,7 +266,7 @@ class Reputation(commands.Cog):
         #     else:
         #         pass        
 
-        if not is_admin and (ctx.author.id == member.id):
+        if not is_admin and (user.id == reaction.message.author.id):
             return
 
         try:
