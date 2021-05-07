@@ -78,7 +78,6 @@ class Reputation(commands.Cog):
                 await ctx.send(embed=e, delete_after=5)
                 return
             elif user[0] == author.id and (curr_time - user[1] > 120):
-                print("Removing from cooldown")
                 self.cooldown.pop(elem)
             else:
                 pass
@@ -263,7 +262,6 @@ class Reputation(commands.Cog):
         #     if user[0] == author.id and (curr_time - user[1]) < 120:
         #         return
         #     elif user[0] == author.id and (curr_time - user[1] > 120):
-        #         print("Removing from cooldown")
         #         self.cooldown.pop(elem)
         #     else:
         #         pass        
@@ -313,7 +311,6 @@ class Reputation(commands.Cog):
         #     if user[0] == author.id and (curr_time - user[1]) < 120:
         #         return
         #     elif user[0] == author.id and (curr_time - user[1] > 120):
-        #         print("Removing from cooldown")
         #         self.cooldown.pop(elem)
         #     else:
         #         pass        
@@ -363,7 +360,6 @@ class Reputation(commands.Cog):
             if user[0] == author.id and (curr_time - user[1]) < 120:
                 return
             elif user[0] == author.id and (curr_time - user[1] > 120):
-                print("Removing from cooldown")
                 self.cooldown.pop(elem)
             else:
                 pass        
