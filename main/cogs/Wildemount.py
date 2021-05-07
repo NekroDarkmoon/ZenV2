@@ -344,8 +344,18 @@ class Wildemount(commands.Cog):
         if (message.channel.id == 719063951442313307) or (message.channel.id == 719070160014803045):
             content = message.content
             if "[" in content and "]" in content:
-                await message.add_reaction('\<:upvote:741279182109147286>') # noqa
-                pass
+                if ('request' in content) or ('reply' in content):
+                    pass
+                else:
+                    conn = self.bot.pool
+                    sql = """ INSERT INTO rep (server_id, user_id, rep)
+                              VALUES ($1, $2, $3)
+                              ON CONFLICT ON CONSTRAINT server_user
+                              DO UPDATE SET rep = rep.rep + $3;"""
+                    try:
+                        await conn.execute(sql, message.guild.id, message.author.id, 1)
+                    except Exception:
+                        log.error(traceback.print_exc())
             else:
                 await message.delete(delay=5)
                 await self.bot.get_channel(message.channel.id).send(embed=response,

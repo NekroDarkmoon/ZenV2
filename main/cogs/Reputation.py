@@ -377,6 +377,16 @@ class Reputation(commands.Cog):
         if author in users: 
             users.remove(author)
         
+        for elem, user in enumerate(users):
+            if user.id == author.id:
+                users.pop(elem)
+            if user.bot:
+                users.pop(elem)
+        
+
+        if len(users) == 0:
+            return
+
         # Give rep to everyone and add user to cooldown list
         try:
             sql = """ INSERT INTO rep (server_id, user_id, rep)
@@ -394,10 +404,15 @@ class Reputation(commands.Cog):
             curr_time = time.time()
             self.cooldown.append((author.id, curr_time))
 
+        if len(users) == 1:
+            e = f"`User {user[0].name} was given 1 rep."
+            await message.channel.send(e)
+            return
+
         e = "`User(s) "
         for user in users:
             e += f"{user.name}, "
-        e += "have been given 1 rep.`"
+        e += "were given 1 rep.`"
         await message.channel.send(e)
 
 def setup(bot):

@@ -55,5 +55,6 @@ class Mod(commands.Cog):
         except Exception:
             log.error(traceback.format_exc())
 
+
 def setup(bot):
     bot.add_cog(Mod(bot))
