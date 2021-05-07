@@ -49,8 +49,6 @@ class Reputation(commands.Cog):
         roles = ctx.author.roles
         is_admin = False
 
-        await ctx.message.delete()
-
         for role in roles:
             if role.name == "Admin":
                 is_admin = True
@@ -101,6 +99,7 @@ class Reputation(commands.Cog):
                                     f"Gave {member.name} {rep} rep.")
             
             await ctx.send(embed=e, delete_after=5)
+            await ctx.message.add_reaction('<:tick:741279181895106592>')
             
             if not is_admin:
                 curr_time = time.time()
@@ -233,6 +232,177 @@ class Reputation(commands.Cog):
             e = emb.gen_embed_cobalt("Ranking", f"```{content}```")
             await ctx.send(embed=e)
 
+
+    #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                          Reaction rep
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction, user):
+        # Variables
+        roles = user.roles
+        conn = self.bot.pool
+        is_admin = False
+        is_bot = False
+
+        # Validation
+        if not reaction.custom_emoji:
+            return
+        
+        if not reaction.emoji.id in [741279182109147286,746127197693018242]:
+            return
+
+        for role in roles: 
+            if role.name == "Admin":
+                is_admin = True
+        
+        if user.bot:
+            is_bot = True
+        
+        # Cooldown check
+        # for elem, user in enumerate(self.cooldown):
+        #     curr_time = time.time()
+        #     if user[0] == author.id and (curr_time - user[1]) < 120:
+        #         return
+        #     elif user[0] == author.id and (curr_time - user[1] > 120):
+        #         print("Removing from cooldown")
+        #         self.cooldown.pop(elem)
+        #     else:
+        #         pass        
+
+        if not is_admin and (ctx.author.id == member.id):
+            return
+
+        try:
+            sql = """ INSERT INTO rep (server_id, user_id, rep)
+                      VALUES ($1, $2, $3)
+                      ON CONFLICT ON CONSTRAINT server_user
+                      DO UPDATE SET rep = rep.rep + $3;"""
             
+            await conn.execute(sql, reaction.message.guild.id, user.id, 1)
+
+        except Exception as e:
+            log.error(traceback.format_exc())
+
+
+    #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                          Reaction rep remove
+    @commands.Cog.listener()
+    async def on_reaction_remove(self, reaction, user):
+        # Variables
+        roles = user.roles
+        conn = self.bot.pool
+        is_admin = False
+        is_bot = False
+
+        # Validation
+        if not reaction.custom_emoji:
+            return
+        
+        if not reaction.emoji.id in [741279182109147286,746127197693018242]:
+            return
+
+        for role in roles: 
+            if role.name == "Admin":
+                is_admin = True
+        
+        if user.bot:
+            is_bot = True
+        
+        # Cooldown check
+        # for elem, user in enumerate(self.cooldown):
+        #     curr_time = time.time()
+        #     if user[0] == author.id and (curr_time - user[1]) < 120:
+        #         return
+        #     elif user[0] == author.id and (curr_time - user[1] > 120):
+        #         print("Removing from cooldown")
+        #         self.cooldown.pop(elem)
+        #     else:
+        #         pass        
+
+        if not is_admin and (ctx.author.id == member.id):
+            return
+
+        try:
+            sql = """ INSERT INTO rep (server_id, user_id, rep)
+                      VALUES ($1, $2, $3)
+                      ON CONFLICT ON CONSTRAINT server_user
+                      DO UPDATE SET rep = rep.rep - $3;"""
+            
+            await conn.execute(sql, reaction.message.guild.id, user.id, 1)
+
+        except Exception as e:
+            log.error(traceback.format_exc())
+            
+
+    #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #                          Reaction rep remove
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        # Variables
+        conn = self.bot.pool
+        author = message.author
+        guild = message.guild
+        is_admin = False
+        hastrigger = False
+
+        triggers = ["thank", "thank you", "thnks", "thnx", "ty"]
+        users = message.mentions
+        text = (message.content).lower()
+
+        # Validation
+        if len(users) == 0:
+            return
+
+        roles = message.author.roles
+        for role in roles: 
+            if role.name == "Admin":
+                is_admin = True
+ 
+        # Cooldown check
+        for elem, user in enumerate(self.cooldown):
+            curr_time = time.time()
+            if user[0] == author.id and (curr_time - user[1]) < 120:
+                return
+            elif user[0] == author.id and (curr_time - user[1] > 120):
+                print("Removing from cooldown")
+                self.cooldown.pop(elem)
+            else:
+                pass        
+
+
+        for trigger in triggers:
+            if trigger in text:
+                hastrigger = True
+                break
+        
+        if hastrigger != True:
+            return
+
+        # Check users
+        if author in users: 
+            users.remove(author)
+        
+        # Give rep to everyone and add user to cooldown list
+        try:
+            sql = """ INSERT INTO rep (server_id, user_id, rep)
+                      VALUES ($1, $2, $3)
+                      ON CONFLICT ON CONSTRAINT server_user
+                      DO UPDATE SET rep = rep.rep + $3;"""
+            
+            for user in users:
+                await conn.execute(sql, guild.id, user.id, 1)
+
+        except Exception as e:
+            log.error(traceback.format_exc())
+
+        if not is_admin:
+            curr_time = time.time()
+            self.cooldown.append((author.id, curr_time))
+
+        e = "`User(s) "
+        for user in users:
+            e += f"{user.name}, "
+        e += "have been given 1 rep.`"
+        await message.channel.send(e)
+
 def setup(bot):
     bot.add_cog(Reputation(bot))

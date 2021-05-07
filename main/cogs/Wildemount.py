@@ -344,6 +344,7 @@ class Wildemount(commands.Cog):
         if (message.channel.id == 719063951442313307) or (message.channel.id == 719070160014803045):
             content = message.content
             if "[" in content and "]" in content:
+                await message.add_reaction('\<:upvote:741279182109147286>') # noqa
                 pass
             else:
                 await message.delete(delay=5)
