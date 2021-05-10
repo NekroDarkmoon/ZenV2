@@ -270,7 +270,7 @@ class Wildemount(commands.Cog):
         
         channel_name = f"{author.name}s game"
         channel_name = re.sub("[^A-Za-z0-9 ]+", '', channel_name)
-        channel_name = channel_name.replace(" ", "-")
+        channel_name = channel_name.lower().replace(" ", "-")
         categories = getattr(server, 'categories', None)
         
         for cat in categories:
