@@ -405,7 +405,8 @@ class Reputation(commands.Cog):
             self.cooldown.append((author.id, curr_time))
 
         if len(users) == 1:
-            e = f"`User {user[0].name} was given 1 rep."
+            user = users[0]
+            e = f"`User {user.name} was given 1 rep.`"
             await message.channel.send(e)
             return
 
