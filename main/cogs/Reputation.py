@@ -341,7 +341,7 @@ class Reputation(commands.Cog):
         is_admin = False
         hastrigger = False
 
-        triggers = ["thank", "thank you", "thnks", "thnx", "ty"]
+        triggers = ["thank", "thank you", "thnks", "thnx", "tyvm"]
         users = message.mentions
         text = (message.content).lower()
 

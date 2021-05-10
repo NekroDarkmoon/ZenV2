@@ -4,8 +4,10 @@
 #                                 Imports
 # --------------------------------------------------------------------------
 # Standard library imports
+import argparse
 import logging
 import random
+import shlex
 import sys
 import os
 import traceback
@@ -23,6 +25,13 @@ from settings import embeds as emb # noqa
 
 log = logging.getLogger(__name__)
 
+
+# --------------------------------------------------------------------------
+#                                 ArgeParse
+# --------------------------------------------------------------------------
+class Arguments(argparse.ArgumentParser):
+    def error(self, message):
+        raise RuntimeError(message)
 
 # --------------------------------------------------------------------------
 #                                 Main
@@ -215,99 +224,164 @@ class Wildemount(commands.Cog):
             await ctx.send(embed=emb.gen_embed_orange("Error", "Internal Error Occured"))
             return
 
+
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                                   CPC
-    @commands.command(name="playchn", help="List all lfg quests")
-    async def playchn(self, ctx, *args):
+    @staticmethod
+    def __get_playchn_arguments(args):
+        parser = Arguments(add_help=False, allow_abbrev=False)
+        parser.add_argument('users', nargs='+')
+        parser.add_argument('-d', '--delete', action='store_true')
+        parser.add_argument('-r', '--remove', action='store_true')
+
+        if args is not None:
+            return parser.parse_args(shlex.split(args))
+        else:
+            return parser.parse_args([])
+    
+
+    @commands.command(name="playchn")
+    async def playchn(self, ctx, *, args: str = None):
         """Creates a channel for you and your friends to use.
 
-        Usage: To create - `playchn @user1 @user2 ... @user9`
-               To delete - `playchn -d`
+        Usage: To create - `&playchn @user1 @user2 ... @user10`
+               To delete - `&playchn @yourself -d`
+               To add - `&playchn @user1 ... @user10`
+               To remove = `&playchn -r @user1 ... @user 10`
 
         **Note:** You can only have one channel.
-        **Note:** Max limit is 9. When mentioning you don't need to mention yourself."""
+        **Note:** Max limit is 10. When adding or removing users you don't need to mention yourself."""
 
-        await ctx.message.delete()
+        try:
+            args = self.__get_playchn_arguments(args)
+        except RuntimeError as e:
+            return await ctx.send(f"`{e}`")
+        
         # Get vars
         server = ctx.guild
         author = ctx.author
-        delete_query = False
-        exit_query = False
 
-        # Initial Validation
-        if len(args) > 15:
-            response = emb.gen_embed_yellow('Error', 'Max of 9 Players allowed.')
-            await ctx.send(embed=response)
+        # Validation
+        if len(args.users) > 10:
+            e = emb.gen_embed_yellow('Error', 'Max of 10 players at a time.')
+            await ctx.send(embed=e)
             return
-
+        
         channel_name = f"{author.name}s game"
         channel_name = channel_name.lower().replace(' ', '-')
-        cat_chns = getattr(server, 'categories', None)
-        for chn in cat_chns:
-            if chn.name == 'Play Channels':
-                category = chn
+        categories = getattr(server, 'categories', None)
+        
+        for cat in categories:
+            if cat.name == 'Play Channels':
+                category = cat
 
         # Validation
         channels = getattr(server, 'channels', None)
-
-        ids = []
-        for arg in args:
-            if len(args) == 1 and arg == '-d':
-                delete_query = True
-            elif len(args) != 1 and arg == '-d':
-                await ctx.send(embed=emb.gen_embed_yellow('Error', 'Invalid Arguments'))
-                return
-            elif arg.startswith('<@!'):
-                ids.append(arg.replace('<@!', '').replace('>', ''))
-
-        # The weird delete query and validation query
+        channelExists = False
+        original_channels = set()
         for channel in channels:
-            if channel.name == channel_name:
-                if delete_query:
-                    try:
-                        await channel.delete()
-                        await ctx.send(embed=emb.gen_embed_green(author.name,
-                                       f'{channel.name} Deleted'), delete_after=5)
-                        exit_query = True
-                    except Exception as e:
-                        log.warning(e)
-                        log.error(traceback.format_exc())
-                else:
-                    e = 'You already have an existing play channel. Unable to create more than one.'
-                    e += '\nPinging a Crownsguard for help'
-                    response = emb.gen_embed_yellow('Error', e)
-                    try:
-                        await ctx.send('<@!157433182331863040>', embed=response)
-                        exit_query = True
-                        break
-                    except Exception as e:
-                        log.warning(e)
-                        log.error(traceback.format_exc())
+            if channel_name == channel.name:
+                channelExists = True
+                original_channels.add(channel)
 
-        if exit_query or delete_query:
-            return
+        
+        # Delete Channel
+        if args.delete:
+            if channelExists:
+                for channel in channels:
+                    if channel.name == channel_name:
+                        try:
+                            await channel.delete()
+                        except Exception:
+                            return log.error(traceback.format_exc())
+                            
+                return await ctx.send(f"`Channels successfully deleted`")
+                
+            else:
+                e = emb.gen_embed_yellow('Error', "You don't have a play channel to delete.")
 
-        # Getting members
-        users = []
-        for id in ids:
-            users.append(await self.bot.fetch_user(id))
+
+        # Get users
+        ids = set()
+        for user in args.users:
+            if user.startswith('<@!'):
+                ids.add(user.replace('<@!', '').replace('>',''))
+        
+        users = [self.bot.get_user(int(idx)) for idx in ids if idx is not None]
+       
+        # Remove Members
+        if args.remove:
+            if channelExists:
+                # Get Channels
+                for channel in original_channels:
+                    if channel.type == discord.ChannelType.text:
+                        text_channel = channel
+                    else:
+                        voice_channel = channel
+
+                # Update Permissions
+                for user in users:
+                    try:
+                        await text_channel.set_permissions(user, overwrite=None)
+                        await voice_channel.set_permissions(user, overwrite=None)
+                        await ctx.send(f"`Users successfully removed.`")
+                    except Exception:
+                        log.error(traceback.format_exc())
+                        return await ctx.send('`Internal Error Occcured`')
+                
+                return
+            elif len(args.users) == 0:
+                e = emb.gen_embed_yellow('Error', "No users specified to remove.")
+            else:
+                e = emb.gen_embed_yellow('Error', "You don't have a play channel to delete.")
+                return await ctx.send(embed=e)
+
+        # Create channel
+        if channelExists:
+            if len(args.users) == 0:
+                e = emb.gen_embed_yellow('Warning', 'You already have a channel. Max # of personal channels is 1.')
+                return await ctx.send(embed=e)
+            else:
+                # Get Channels
+                for channel in original_channels:
+                    if channel.type == discord.ChannelType.text:
+                        text_channel = channel
+                    else:
+                        voice_channel = channel
+                # Update channels
+                text_overwrite = discord.PermissionOverwrite()
+                text_overwrite.send_messages = True
+                voice_overwrite = discord.PermissionOverwrite()
+                voice_overwrite.speak = True
+
+                for user in users:
+                    try:
+                        await text_channel.set_permissions(user, overwrite=text_overwrite)
+                        await voice_channel.set_permissions(user, overwrite=voice_overwrite)
+                        await ctx.send(f"`Users successfully added.`")
+                    except Exception:
+                        log.error(traceback.format_exc())
+                        return await ctx.send('`Internal Error Occcured`')
+                
+                return
+
 
         # Setting permissions
         overwrites = {
-            server.default_role: discord.PermissionOverwrite(send_messages=False),
-            author: discord.PermissionOverwrite(send_messages=True)
+            server.default_role: discord.PermissionOverwrite(send_messages=False, mention_everyone=False),
+            author: discord.PermissionOverwrite(send_messages=True, manage_messages=True, manage_channels=True, mention_everyone=False)
             }
 
         audio_overwrites = {
-            server.default_role: discord.PermissionOverwrite(speak=True),
-            author: discord.PermissionOverwrite(speak=False)
+            server.default_role: discord.PermissionOverwrite(speak=False),
+            author: discord.PermissionOverwrite(speak=True)
             }
 
         for user in users:
             overwrites.update({user: discord.PermissionOverwrite(send_messages=True)})
             audio_overwrites.update(
                 {user: discord.PermissionOverwrite(speak=True)}
-                )
+            )
 
         try:
             channel = await server.create_text_channel(channel_name, overwrites=overwrites,
@@ -315,9 +389,12 @@ class Wildemount(commands.Cog):
             await server.create_voice_channel(channel_name, category=category)
             response = emb.gen_embed_green('Game Channel', 'Created respective channels.')
             await ctx.send(channel.mention, embed=response)
+
         except Exception as e:
-            log.warning(e)
             log.error(traceback.format_exc())
+            e = emb.gen_embed_red('Internal Error', 'An internal error has occured. Please message NekroDarkmoon#2995')
+            return await ctx.send(embed=e)
+
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                       Setting up channel restrictions
