@@ -7,6 +7,7 @@
 import argparse
 import logging
 import random
+import re
 import shlex
 import sys
 import os
@@ -268,7 +269,8 @@ class Wildemount(commands.Cog):
             return
         
         channel_name = f"{author.name}s game"
-        channel_name = channel_name.lower().replace(' ', '-')
+        channel_name = re.sub("[^A-Za-z0-9 ]+", '', channel_name)
+        channel_name = channel_name.replace(" ", "-")
         categories = getattr(server, 'categories', None)
         
         for cat in categories:
