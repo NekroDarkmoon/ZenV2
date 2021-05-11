@@ -306,8 +306,8 @@ class Wildemount(commands.Cog):
         # Get users
         ids = set()
         for user in args.users:
-            if user.startswith('<@!'):
-                ids.add(user.replace('<@!', '').replace('>',''))
+            if user.startswith('<@'):
+                ids.add(re.sub("[^0-9]+", '', user))
         
         users = [self.bot.get_user(int(idx)) for idx in ids if idx is not None]
        
