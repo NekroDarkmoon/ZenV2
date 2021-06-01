@@ -96,7 +96,7 @@ class Logging(commands.Cog):
         if before.author.bot:
             return
         elif after.edited_at is not None:
-            if (after.edited_at - before.created_at).total_seconds() < 60:
+            if (after.edited_at - before.created_at).total_seconds() < 20:
                 return
         elif before.content == after.content:
             return
