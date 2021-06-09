@@ -43,7 +43,7 @@ class Wildemount(commands.Cog):
 
     # Cog check
     async def cog_check(self, ctx):
-        guilds = [719063399148814418, 739684323141353597]
+        guilds = [719063399148814418, 739684323141353597, 844643536409460757]
         return True if ctx.guild.id in guilds else False
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
