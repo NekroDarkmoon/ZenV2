@@ -234,100 +234,100 @@ class Reputation(commands.Cog):
 
     #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #                          Reaction rep
-    @commands.Cog.listener()
-    async def on_reaction_add(self, reaction, user):
-        # Variables
-        roles = user.roles
-        conn = self.bot.pool
-        is_admin = False
-        is_bot = False
+    # @commands.Cog.listener()
+    # async def on_reaction_add(self, reaction, user):
+    #     # Variables
+    #     roles = user.roles
+    #     conn = self.bot.pool
+    #     is_admin = False
+    #     is_bot = False
 
-        # Validation
-        if not reaction.custom_emoji:
-            return
+    #     # Validation
+    #     if not reaction.custom_emoji:
+    #         return
         
-        if not reaction.emoji.id in [741279182109147286,746127197693018242]:
-            return
+    #     if not reaction.emoji.id in [741279182109147286,746127197693018242]:
+    #         return
 
-        for role in roles: 
-            if role.name == "Admin":
-                is_admin = True
+    #     for role in roles: 
+    #         if role.name == "Admin":
+    #             is_admin = True
         
-        if user.bot:
-            is_bot = True
+    #     if user.bot:
+    #         is_bot = True
         
-        # Cooldown check
-        # for elem, user in enumerate(self.cooldown):
-        #     curr_time = time.time()
-        #     if user[0] == author.id and (curr_time - user[1]) < 120:
-        #         return
-        #     elif user[0] == author.id and (curr_time - user[1] > 120):
-        #         self.cooldown.pop(elem)
-        #     else:
-        #         pass        
+    #     # Cooldown check
+    #     # for elem, user in enumerate(self.cooldown):
+    #     #     curr_time = time.time()
+    #     #     if user[0] == author.id and (curr_time - user[1]) < 120:
+    #     #         return
+    #     #     elif user[0] == author.id and (curr_time - user[1] > 120):
+    #     #         self.cooldown.pop(elem)
+    #     #     else:
+    #     #         pass        
 
-        if not is_admin and (user.id == reaction.message.author.id):
-            return
+    #     if not is_admin and (user.id == reaction.message.author.id):
+    #         return
 
-        try:
-            sql = """ INSERT INTO rep (server_id, user_id, rep)
-                      VALUES ($1, $2, $3)
-                      ON CONFLICT ON CONSTRAINT server_user
-                      DO UPDATE SET rep = rep.rep + $3;"""
+    #     try:
+    #         sql = """ INSERT INTO rep (server_id, user_id, rep)
+    #                   VALUES ($1, $2, $3)
+    #                   ON CONFLICT ON CONSTRAINT server_user
+    #                   DO UPDATE SET rep = rep.rep + $3;"""
             
-            await conn.execute(sql, reaction.message.guild.id, user.id, 1)
+    #         await conn.execute(sql, reaction.message.guild.id, user.id, 1)
 
-        except Exception as e:
-            log.error(traceback.format_exc())
+    #     except Exception as e:
+    #         log.error(traceback.format_exc())
 
 
-    #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    #                          Reaction rep remove
-    @commands.Cog.listener()
-    async def on_reaction_remove(self, reaction, user):
-        # Variables
-        roles = user.roles
-        conn = self.bot.pool
-        is_admin = False
-        is_bot = False
+    # #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # #                          Reaction rep remove
+    # @commands.Cog.listener()
+    # async def on_reaction_remove(self, reaction, user):
+    #     # Variables
+    #     roles = user.roles
+    #     conn = self.bot.pool
+    #     is_admin = False
+    #     is_bot = False
 
-        # Validation
-        if not reaction.custom_emoji:
-            return
+    #     # Validation
+    #     if not reaction.custom_emoji:
+    #         return
         
-        if not reaction.emoji.id in [741279182109147286,746127197693018242]:
-            return
+    #     if not reaction.emoji.id in [741279182109147286,746127197693018242]:
+    #         return
 
-        for role in roles: 
-            if role.name == "Admin":
-                is_admin = True
+    #     for role in roles: 
+    #         if role.name == "Admin":
+    #             is_admin = True
         
-        if user.bot:
-            is_bot = True
+    #     if user.bot:
+    #         is_bot = True
         
-        # Cooldown check
-        # for elem, user in enumerate(self.cooldown):
-        #     curr_time = time.time()
-        #     if user[0] == author.id and (curr_time - user[1]) < 120:
-        #         return
-        #     elif user[0] == author.id and (curr_time - user[1] > 120):
-        #         self.cooldown.pop(elem)
-        #     else:
-        #         pass        
+    #     # Cooldown check
+    #     # for elem, user in enumerate(self.cooldown):
+    #     #     curr_time = time.time()
+    #     #     if user[0] == author.id and (curr_time - user[1]) < 120:
+    #     #         return
+    #     #     elif user[0] == author.id and (curr_time - user[1] > 120):
+    #     #         self.cooldown.pop(elem)
+    #     #     else:
+    #     #         pass        
 
-        if not is_admin and (user.id == reaction.message.author.id):
-            return
+    #     if not is_admin and (user.id == reaction.message.author.id):
+    #         return
 
-        try:
-            sql = """ INSERT INTO rep (server_id, user_id, rep)
-                      VALUES ($1, $2, $3)
-                      ON CONFLICT ON CONSTRAINT server_user
-                      DO UPDATE SET rep = rep.rep - $3;"""
+    #     try:
+    #         sql = """ INSERT INTO rep (server_id, user_id, rep)
+    #                   VALUES ($1, $2, $3)
+    #                   ON CONFLICT ON CONSTRAINT server_user
+    #                   DO UPDATE SET rep = rep.rep - $3;"""
             
-            await conn.execute(sql, reaction.message.guild.id, user.id, 1)
+    #         await conn.execute(sql, reaction.message.guild.id, user.id, 1)
 
-        except Exception as e:
-            log.error(traceback.format_exc())
+    #     except Exception as e:
+    #         log.error(traceback.format_exc())
             
 
     #  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
