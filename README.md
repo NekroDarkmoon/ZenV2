@@ -22,8 +22,8 @@
 config.py
 ```py
 
-client_id   = 276684272004497410 
-token = "Mjc2Njg0MjcyMDA0NDk3NDEw.WJMgTg.Q1M0CzdAg-IpG4HOoGur8Qs7h7Q"
+client_id = ""  
+token = ""
 postgresql = 'postgresql://user:pass@host/database'
 prefix = ""
 
