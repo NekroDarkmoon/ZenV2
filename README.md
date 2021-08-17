@@ -24,7 +24,7 @@ config.py
 
 client_id = ""  
 token = ""
-postgresql = 'postgresql://user:pass@host/database'
+db = 'postgresql://user:pass@host/database'
 prefix = ""
 
 ```
