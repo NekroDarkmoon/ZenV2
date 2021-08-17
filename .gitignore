@@ -137,3 +137,4 @@ node_modules/*
 venv/*
 config.py
 /main/data/ytcache/
+/main/settings/config.py
