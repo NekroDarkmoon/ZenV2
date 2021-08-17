@@ -15,3 +15,20 @@
 01. Download from https://www.postgresql.org/
 02. Create a new user called  `Zen` with `yourpw`
 03. Create a new database called `Zen` with owner `Zen`
+
+
+### Config template
+
+config.json
+```JSON
+
+{
+    "client_id": "",
+    "client_secret": "",
+    "db_pass": "",
+    "token": "",
+    "prefix": ""
+}
+
+
+```
