@@ -68,9 +68,18 @@ def setup_logging() -> None:
         log = logging.getLogger()
         log.setLevel(logging.INFO)
         handler = RotatingFileHandler(filename='Zen.log', encoding='utf-8', mode='w', maxBytes=max_bytes, backupCount=5)
-        
+        dt_fmt = '%Y-%m-%d %H:%M:%S'
+        fmt = logging.Formatter('[{asctime}] [{levelname:<7}] {name}: {message}', dt_fmt, style='{')
+        handler.setFormatter(fmt)
+        log.addHandler(handler)
 
+        yield
     finally:
+        # __exit__
+        handlers = log.handlers[:]
+        for hdlr in handlers:
+            hdlr.close()
+            log.removeHandler(hdlr)
 
 
 
