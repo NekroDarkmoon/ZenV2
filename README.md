@@ -24,7 +24,7 @@ config.py
 
 client_id = ""  
 token = ""
-db = 'postgresql://user:pass@host/database'
+db = 'postgresql://user:pass@localhost:5432/database'
 prefix = ""
 stat_webhook = ('877310740992753714', "JrHoh8FJ9o8lJPITtzuZMjFiRgsWojNONRFk4UglG15SzqV6OHHlt7-O8dQvf2Vvk3mu")
 
