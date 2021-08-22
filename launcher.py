@@ -24,9 +24,7 @@ BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
 import main.settings.config as config
 from main.bot import Zen # noqa
-from main.cogs.utils.db import Table # noqa
-
-
+from main.cogs.utils.db import DB # noqa
 
 
 # --------------------------------------------------------------------------
@@ -95,8 +93,7 @@ def run_bot() -> None:
     }
 
     try:
-        pool = None
-        # pool = loop.run_until_complete(Table.create_pool(config.db, **kwargs))
+        pool = loop.run_until_complete(DB.create_pool(config.db, **kwargs))
     except Exception as e:
         click.echo("Could not set up postgres. Exiting.", file=sys.stderr)
         log.exception("Could not set up postress. Exiting.")
