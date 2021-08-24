@@ -97,6 +97,7 @@ def run_bot() -> None:
     except Exception as e:
         click.echo("Could not set up postgres. Exiting.", file=sys.stderr)
         log.exception("Could not set up postress. Exiting.")
+        print(traceback.print_exc())
         return
 
     bot = Zen()

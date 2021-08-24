@@ -5,6 +5,7 @@ import asyncpg
 import json
 import traceback
 
+from main.settings import schema 
 
 # --------------------------------------------------------------------------
 #                                    Run Bot
@@ -61,9 +62,39 @@ class DB:
         
         cls._pool = pool = await asyncpg.create_pool(uri, **kwargs)
 
+        # Do db stuff
+        await cls.create_schemas(pool)
+
         return pool
 
 
     @classmethod
     def aquire_connection(cls, conn):
         return MaybeAcquire(conn, pool=cls._pool)
+
+
+    # Create Schemas
+    @classmethod
+    async def create_schemas(cls, conn):
+        sql_queries:dict = schema.tables
+        ct:str = "CREATE TABLE IF NOT EXISTS"
+
+        for table, query in sql_queries.items():
+            sql: str = f"{ct} {table}({query})"
+            await conn.execute(sql)
+            
+    
+    # Get Migrations.
+    @classmethod
+    def get_migrations(cls):
+        pass
+
+    # Migrate if needed.
+    @classmethod
+    def migrate(cls, conn):
+        pass
+
+    # Data integrity checks.
+    # Log information
+
+
