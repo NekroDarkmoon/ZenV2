@@ -72,6 +72,7 @@ class Pages(discord.ui.View):
     
     async def _get_kwargs_from_page(self, page:int) -> Dict[str, Any]:
         value = await discord.utils.maybe_coroutine(self.source.format_page, self, page)
+        print(value)
         if isinstance(value, dict):
             return value
         elif isinstance(value, str):
@@ -122,8 +123,8 @@ class Pages(discord.ui.View):
                 self.go_to_next_page.disabled = True
                 self.go_to_next_page.label = '…'
             if page_number == 0:
-                self.go_to_previous_page.disabled = True
-                self.go_to_previous_page.label = '…'
+                self.go_to_prev_page.disabled = True
+                self.go_to_prev_page.label = '…'
             
     
     async def show_checked_page(self, interaction: discord.Interaction, page_number: int) -> None:
@@ -155,6 +156,9 @@ class Pages(discord.ui.View):
             await interaction.followup.send("`An unknown error occurred, sorry`", ephemeral=True)
         else:
             await interaction.response.send_message("`An unknown error occurred, sorry`", ephemeral=True)
+        
+        print(error)
+        traceback.print_exc()
 
     
     async def start(self) -> None:
@@ -200,7 +204,7 @@ class Pages(discord.ui.View):
 
 
     @discord.ui.button(label='Skip to ', style=discord.ButtonStyle.grey)
-    async def go_to_first_page(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def numbered_page(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Type a page # to go to"""
         if self.input_lock.locked():
             await interaction.response.send_message("`Already waiting for your response...`", ephemeral=True)
@@ -228,7 +232,7 @@ class Pages(discord.ui.View):
                 await msg.delete()
                 await self.show_checked_page(interaction, page - 1)
             
-    @discord.ui.button(label='🟥', style=discord.ButtonStyle.red)
+    @discord.ui.button(label='⬛', style=discord.ButtonStyle.red)
     async def stop_pages(self, button: discord.ui.Button, interaction: discord.Interaction):
         """Stop the pagination session."""
         await interaction.response.defer()

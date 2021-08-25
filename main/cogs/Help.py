@@ -34,7 +34,7 @@ log = logging.getLogger(__name__)
 #                               Help Menu
 # --------------------------------------------------------------------------
 class HelpMenu(Pages):
-    def __init__(self, source: menus.PageSource, *, ctx: commands.Context):
+    def __init__(self, source: menus.PageSource, ctx: commands.Context):
         super().__init__(source, ctx=ctx, comapct=True)
     
 
@@ -126,7 +126,7 @@ class GroupHelpPageSource(menus.ListPageSource):
         self.description: str = self.group.description
     
 
-    async def fromat_page(self, menu, commands):
+    async def format_page(self, menu, commands):
         embed = discord.Embed(title=self.title, description=self.description, color=discord.Colour(0xA8B9CD))
 
         for command in commands:
@@ -283,6 +283,10 @@ class Help(commands.Cog):
         bot.help_command = PaginatedHelpCommand()
         bot.help_command.cog = self
 
+
+    @commands.command(name="ping")
+    async def ping(self, ctx):
+        await ctx.reply("`Pong: !`")
 
 
 def setup(bot) -> None:
