@@ -72,7 +72,6 @@ class Pages(discord.ui.View):
     
     async def _get_kwargs_from_page(self, page:int) -> Dict[str, Any]:
         value = await discord.utils.maybe_coroutine(self.source.format_page, self, page)
-        print(value)
         if isinstance(value, dict):
             return value
         elif isinstance(value, str):

@@ -21,6 +21,7 @@ from discord.ext import commands
 from main.cogs.utils import context # noqa
 import main.settings.config as config
 from main.cogs.utils.config import Config
+from main.others.Help import PaginatedHelpCommand
 # from cogs.utils import embed_help as EmbedHelpCommand # noqa
 
 
@@ -74,7 +75,8 @@ class Zen(commands.AutoShardedBot):
         super().__init__(command_prefix=_prefix_callable, description=description,
                          pm_help=None, help_attrs=dict(hidden=True), fetch_offline_members=True,
                          chunk_guilds_at_startup=False, heartbeat_timeout=150.0,
-                         allowed_mentions=allowed_mentions, intents=intents)
+                         help_command=PaginatedHelpCommand(), allowed_mentions=allowed_mentions,
+                         intents=intents)
 
         
         self.client_id = config.client_id

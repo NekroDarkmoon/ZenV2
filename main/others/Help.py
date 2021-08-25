@@ -273,21 +273,3 @@ class PaginatedHelpCommand(commands.HelpCommand):
 # --------------------------------------------------------------------------
 #                                 Main
 # --------------------------------------------------------------------------
-# --------------------------------------------------------------------------
-#                                 Main
-# --------------------------------------------------------------------------
-class Help(commands.Cog):
-    def __init__(self, bot: commands.AutoShardedBot) -> None:
-        self.bot = bot
-        self.old_help_command = bot.help_command
-        bot.help_command = PaginatedHelpCommand()
-        bot.help_command.cog = self
-
-
-    @commands.command(name="ping")
-    async def ping(self, ctx):
-        await ctx.reply("`Pong: !`")
-
-
-def setup(bot) -> None:
-    bot.add_cog(Help(bot))
