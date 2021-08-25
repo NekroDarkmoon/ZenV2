@@ -114,7 +114,7 @@ class Zen(commands.AutoShardedBot):
                 del dates[index]
 
     
-    async def on_socket_response(self, msg) -> None:
+    async def on_socket_raw_receive(self, msg: str) -> None:
         self._prev_events.append(msg)
 
     
